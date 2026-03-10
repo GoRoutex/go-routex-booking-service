@@ -3,6 +3,7 @@ package vn.com.routex.hub.booking.service.infrastructure.persistence.utils;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.MapperFeature;
@@ -40,6 +41,14 @@ public class JsonUtils {
     public Object parseToObject(String message, Class<Object> clazz) throws JsonProcessingException {
         try {
             return objectMapper.readValue(message, clazz);
+        } catch (Exception e) {
+            throw new BusinessException(ExceptionUtils.buildResultResponse(TIMEOUT_ERROR, TIMEOUT_ERROR_MESSAGE));
+        }
+    }
+
+    public <T> T parseToKafkaObject(String message, TypeReference<T> type) {
+        try {
+            return objectMapper.readValue(message, type);
         } catch (Exception e) {
             throw new BusinessException(ExceptionUtils.buildResultResponse(TIMEOUT_ERROR, TIMEOUT_ERROR_MESSAGE));
         }

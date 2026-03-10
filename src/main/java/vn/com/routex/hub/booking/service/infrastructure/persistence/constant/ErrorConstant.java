@@ -26,6 +26,9 @@ public class ErrorConstant {
 
     public static final String INVALID_HTTP_REQUEST_RESOURCE_ERROR_MESSAGE = "Resource %s path is not exists";
 
+    public static final String INVALID_DATA_ERROR = "0410";
+    public static final String INVALID_DATA_ERROR_MESSAGE = "Invalid data error";
+    public static final String INVALID_EVENT_MESSAGE = "Invalid %s event";
     public static final String INVALID_INPUT_ERROR = "0310";
     public static final String SEAT_NOT_AVAILABLE = "Seat %s is not available";
     public static final String INVALID_INPUT_MESSAGE = "Invalid Input";

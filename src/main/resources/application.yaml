@@ -34,6 +34,7 @@ spring:
         max.poll.records: 500
 
     events:
+      route-ready-for-sale: "routex.route.ready-for-sale"
       # Booking Events
       booking-created: "routex.booking.created"
       booking-confirmed: "routex.booking.confirmed"
@@ -56,8 +57,9 @@ spring:
       notification-sms: "routex.notification.sms"
 
     topics:
+      routes: "route-management"
       bookings: "bus-bookings"
-      payments: "bus-payments"
+      payments: "route-payments"
       seats: "bus-seats"
       notifications: "bus-notifications"
       dead-letter: "bus-dead-letter-queue"
@@ -81,7 +83,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:none}
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
     show-sql: ${SPRING_JPA_SHOW_SQL:false}
 
   jackson:
