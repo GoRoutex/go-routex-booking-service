@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: write
+  packages: write
 
 concurrency:
   group: release-${{ github.ref }}
@@ -90,25 +91,28 @@ jobs:
           done
 
       # -------------------------
-      # 2) BUILD & PUSH IMAGE (GitLab Registry)
+      # 2) BUILD & PUSH IMAGE (GHCR)
       # -------------------------
-      - name: Login to GitLab Container Registry
+      - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          registry: ${{ secrets.CI_REGISTRY }}
-          username: ${{ secrets.CI_REGISTRY_USER }}
-          password: ${{ secrets.CI_REGISTRY_PASSWORD }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build & push image
         shell: bash
         run: |
           set -euo pipefail
           TAG="$(cat tag.txt)"
-          IMAGE="${{ secrets.CI_REGISTRY_IMAGE }}"
+          OWNER_LOWER="$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')"
+          REPO_LOWER="$(echo "${GITHUB_REPOSITORY#*/}" | tr '[:upper:]' '[:lower:]')"
+          IMAGE="ghcr.io/${OWNER_LOWER}/${REPO_LOWER}"
 
           echo "Build & push image: ${IMAGE}:${TAG}"
-          docker build -t "${IMAGE}:${TAG}" .
+          docker build -t "${IMAGE}:${TAG}" -t "${IMAGE}:latest" .
           docker push "${IMAGE}:${TAG}"
+          docker push "${IMAGE}:latest"
 
       # -------------------------
       # 3) UPDATE GITOPS VALUES (dev)
@@ -125,27 +129,31 @@ jobs:
       - name: Update values-dev.yaml and push
         shell: bash
         run: |
-          set -euxo pipefail   # <- thêm -x để thấy command
+          set -euxo pipefail
           TAG="$(cat tag.txt)"
-          IMAGE="${{ secrets.CI_REGISTRY_IMAGE }}"
+          OWNER_LOWER="$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')"
+          REPO_LOWER="$(echo "${GITHUB_REPOSITORY#*/}" | tr '[:upper:]' '[:lower:]')"
+          IMAGE="ghcr.io/${OWNER_LOWER}/${REPO_LOWER}"
           PROJECT_NAME="$(basename "${GITHUB_REPOSITORY}")"
           VALUES_PATH="deployment-config/service/${PROJECT_NAME}/values-dev.yaml"
-      
+
           cd gitops
           git config user.email "routex@orion-hub"
           git config user.name "routex-bot"
-      
+
           ls -la deployment-config/service || true
           echo "PROJECT_NAME=$PROJECT_NAME"
           echo "VALUES_PATH=$VALUES_PATH"
-      
+          echo "IMAGE=$IMAGE"
+          echo "TAG=$TAG"
+
           test -f "$VALUES_PATH"
-      
+
           yq -i ".image.repository = \"${IMAGE}\"" "$VALUES_PATH"
           yq -i ".image.tag = \"${TAG}\"" "$VALUES_PATH"
-      
+
           git add "$VALUES_PATH"
           git commit -m "chore(gitops): ${PROJECT_NAME} -> ${TAG} (dev)" || echo "No changes"
-      
+
           git pull --rebase origin "${{ secrets.GITOPS_BRANCH }}"
           git push origin "${{ secrets.GITOPS_BRANCH }}"
