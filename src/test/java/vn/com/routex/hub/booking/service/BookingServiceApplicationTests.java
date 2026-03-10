@@ -1,4 +1,4 @@
-package vn.com.booking;
+package vn.com.routex.hub.booking.service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
