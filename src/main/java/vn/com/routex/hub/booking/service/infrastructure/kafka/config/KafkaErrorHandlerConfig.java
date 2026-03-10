@@ -1,4 +1,4 @@
-package vn.com.routex.hub.booking.service.infrastructure.kafka;
+package vn.com.routex.hub.booking.service.infrastructure.kafka.config;
 
 
 import lombok.RequiredArgsConstructor;
@@ -13,9 +13,9 @@ import vn.com.routex.hub.booking.service.infrastructure.kafka.properties.KafkaEv
 
 @Configuration
 @RequiredArgsConstructor
-public class KafkaErrorHandler {
+public class KafkaErrorHandlerConfig {
 
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final KafkaTemplate<String, String> kafkaTemplate;
     private final KafkaEventProperties kafkaEventProperties;
 
     @Bean
