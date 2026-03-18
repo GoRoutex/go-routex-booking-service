@@ -1,4 +1,4 @@
-package vn.com.routex.hub.booking.service.interfaces.models.base;
+package vn.com.routex.hub.booking.service.controller.models.base;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

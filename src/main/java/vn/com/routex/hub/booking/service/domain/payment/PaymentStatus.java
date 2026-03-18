@@ -1,4 +1,4 @@
-package vn.com.routex.hub.booking.service.domain.booking;
+package vn.com.routex.hub.booking.service.domain.payment;
 
 public enum PaymentStatus {
     UNPAID,

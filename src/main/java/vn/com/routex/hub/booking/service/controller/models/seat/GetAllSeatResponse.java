@@ -1,11 +1,11 @@
-package vn.com.routex.hub.booking.service.interfaces.models.seat;
+package vn.com.routex.hub.booking.service.controller.models.seat;
 
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import vn.com.routex.hub.booking.service.interfaces.models.base.BaseResponse;
+import vn.com.routex.hub.booking.service.controller.models.base.BaseResponse;
 
 import java.util.List;
 

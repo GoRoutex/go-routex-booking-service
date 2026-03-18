@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.config.RequestAttributes;
-import vn.com.routex.hub.booking.service.interfaces.models.base.BaseRequest;
+import vn.com.routex.hub.booking.service.controller.models.base.BaseRequest;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

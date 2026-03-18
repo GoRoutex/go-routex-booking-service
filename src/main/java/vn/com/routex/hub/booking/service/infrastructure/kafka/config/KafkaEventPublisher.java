@@ -5,7 +5,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.model.KafkaEventMessage;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.JsonUtils;
-import vn.com.routex.hub.booking.service.interfaces.models.base.BaseRequest;
+import vn.com.routex.hub.booking.service.controller.models.base.BaseRequest;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;

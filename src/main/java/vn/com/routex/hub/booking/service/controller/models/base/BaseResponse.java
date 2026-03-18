@@ -1,4 +1,4 @@
-package vn.com.routex.hub.booking.service.interfaces.models.base;
+package vn.com.routex.hub.booking.service.controller.models.base;
 
 
 import lombok.AllArgsConstructor;
@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import vn.com.routex.hub.booking.service.interfaces.models.result.ApiResult;
+import vn.com.routex.hub.booking.service.controller.models.result.ApiResult;
 
 @Getter
 @Setter
