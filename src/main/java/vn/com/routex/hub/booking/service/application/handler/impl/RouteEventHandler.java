@@ -3,7 +3,6 @@ package vn.com.routex.hub.booking.service.application.handler.impl;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import vn.com.go.routex.identity.security.log.SystemLog;
 import vn.com.routex.hub.booking.service.application.handler.RouteEvent;
 import vn.com.routex.hub.booking.service.domain.seat.RouteSeat;
 import vn.com.routex.hub.booking.service.domain.seat.RouteSeatRepository;
@@ -13,6 +12,7 @@ import vn.com.routex.hub.booking.service.domain.vehicle.VehicleRepository;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.event.RouteSellableEvent;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.model.KafkaEventMessage;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.exception.BusinessException;
+import vn.com.routex.hub.booking.service.infrastructure.persistence.log.SystemLog;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.ExceptionUtils;
 
 import java.util.ArrayList;
