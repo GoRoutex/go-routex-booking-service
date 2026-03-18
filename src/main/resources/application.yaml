@@ -55,14 +55,22 @@ spring:
       # Notification Events
       notification-email: "routex.notification.email"
       notification-sms: "routex.notification.sms"
+      notification-activities: "routex.notification.activities"
 
     topics:
-      routes: "route-management"
-      bookings: "bus-bookings"
-      payments: "route-payments"
-      seats: "bus-seats"
-      notifications: "bus-notifications"
+      routes: "route.event.management"
+      bookings: "booking.event.management"
+      payment-success: "payment.success.event.management"
+      payment-failed: "payment.failed.event.management"
+      seats: "seat.event.management"
+      notifications: "notification.event.management"
       dead-letter: "bus-dead-letter-queue"
+
+    group-id:
+      bookings: booking-service
+      payments: payment-service
+
+
 
     listener:
       ack-mode: manual
@@ -121,11 +129,11 @@ jms:
   max-message: ${JMS_MAX_MESSAGE:1}
 
 server:
-  port: ${SERVER_PORT:8000}
+  port: ${SERVER_PORT:8001}
 
 identity:
   jwt:
-    secret: ${JWT_SECRET}
+    secret: ${JWT_SECRET:CZZRadv0Xe8z3stWFWYdtiJ2E86gUgJvFEfbCYFgJhQ}
     issuer: ${JWT_ISSUER:user-service}
     audience: ${JWT_AUDIENCE:management-service}
     authority-claim-name: ${JWT_CLAIM_NAME:roles}

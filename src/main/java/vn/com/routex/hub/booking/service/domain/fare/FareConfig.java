@@ -1,10 +1,7 @@
-package vn.com.routex.hub.booking.service.domain.seat;
-
+package vn.com.routex.hub.booking.service.domain.fare;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -15,7 +12,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
-import java.time.OffsetDateTime;
+import java.math.BigDecimal;
 
 @Getter
 @Setter
@@ -23,24 +20,18 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 @SuperBuilder
 @Entity
-@Table(name = "ROUTE_SEAT")
-public class RouteSeat {
+@Table(name = "FARE_CONFIG")
+public class FareConfig {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+    @Column(name = "VEHICLE_TYPE", nullable = false, unique = true)
+    private String vehicleType;
 
-    @Column(name = "ROUTE_ID")
-    private String routeId;
+    @Column(name = "BASE_PRICE", nullable = false)
+    private BigDecimal basePrice;
 
-    @Column(name = "SEAT_NO")
-    private String seatNo;
-
-    @Column(name = "STATUS")
-    @Enumerated(EnumType.STRING)
-    private SeatStatus status;
-
-    @Column(name = "CREATOR")
-    private String creator;
-
+    @Column(name = "CURRENCY", nullable = false)
+    private String currency;
 }

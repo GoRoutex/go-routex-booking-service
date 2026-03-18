@@ -1,4 +1,4 @@
-package vn.com.routex.hub.booking.service.interfaces.models.seat;
+package vn.com.routex.hub.booking.service.controller.models.seat;
 
 
 import jakarta.validation.constraints.NotBlank;
@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import vn.com.routex.hub.booking.service.interfaces.models.base.BaseRequest;
+import vn.com.routex.hub.booking.service.controller.models.base.BaseRequest;
 
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ApplicationConstant.UUID_REGEX;
 

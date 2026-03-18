@@ -43,9 +43,6 @@ public class BookingSeat extends AbstractAuditingEntity {
     @Enumerated(EnumType.STRING)
     private BookingSeatStatus status;
 
-    @Column(name = "TICKET_ID")
-    private String ticketId;
-
     @Column(name = "CREATOR")
     private String creator;
 

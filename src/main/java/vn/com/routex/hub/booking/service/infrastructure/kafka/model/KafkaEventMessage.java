@@ -1,7 +1,6 @@
 package vn.com.routex.hub.booking.service.infrastructure.kafka.model;
 
 import lombok.Builder;
-import vn.com.routex.hub.booking.service.interfaces.models.base.BaseRequest;
 
 import java.time.OffsetDateTime;
 

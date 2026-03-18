@@ -1,4 +1,4 @@
-package vn.com.routex.hub.booking.service.interfaces.models.result;
+package vn.com.routex.hub.booking.service.controller.models.result;
 
 
 import lombok.AllArgsConstructor;

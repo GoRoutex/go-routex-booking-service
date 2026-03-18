@@ -1,11 +1,14 @@
 package vn.com.routex.hub.booking.service.domain.seat;
 
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import vn.com.routex.hub.booking.service.interfaces.models.seat.RouteSeatView;
+import vn.com.routex.hub.booking.service.controller.models.seat.RouteSeatView;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface RouteSeatRepository extends JpaRepository<RouteSeat, String> {
 
@@ -27,5 +30,17 @@ public interface RouteSeatRepository extends JpaRepository<RouteSeat, String> {
 
     List<RouteSeat> findAllByRouteIdOrderBySeatNoAsc(String routeId);
 
-    List<RouteSeat> findAllByRouteIdAndSeatNoIn(String routeId, List<String> seatNos);
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query(value = """
+                   select rs
+                   from RouteSeat rs
+                   where rs.routeId = :routeId
+                   and rs.seatNo in :seatNos
+                   """)
+    List<RouteSeat> findAllByRouteIdAndSeatNoInForUpdate(@Param("routeId") String routeId,
+                                                         @Param("seatNos") List<String> seatNos);
+
+    Optional<RouteSeat> findByRouteId(String routeId);
+
+    Optional<RouteSeat> findByRouteIdAndSeatNo(String routeId, String seatNo);
 }
