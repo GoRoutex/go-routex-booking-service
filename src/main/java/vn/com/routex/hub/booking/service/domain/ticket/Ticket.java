@@ -29,6 +29,14 @@ public class Ticket extends AbstractAuditingEntity {
     private String id;
     @Column(name = "TICKET_CODE", nullable = false)
     private String ticketCode;
+    @Column(name = "BOOKING_ID", nullable = false)
+    private String bookingId;
+    @Column(name = "PAYMENT_ID", nullable = false)
+    private String paymentId;
+    @Column(name = "BOOKING_SEAT_ID", nullable = false)
+    private String bookingSeatId;
+    @Column(name = "CUSTOMER_ID", nullable = false)
+    private String customerId;
     @Column(name = "QR_CODE", nullable = false)
     private String qrCode;
     @Column(name = "CUSTOMER_PHONE", nullable = false)
@@ -37,16 +45,12 @@ public class Ticket extends AbstractAuditingEntity {
     private String customerEmail;
     @Column(name = "CUSTOMER_NAME", nullable = false)
     private String customerName;
-    @Column(name = "ROUTE_ID", nullable = false)
-    private String routeId;
-    @Column(name = "BOOKING_ID", nullable = false)
-    private String bookingId;
-    @Column(name = "VEHICLE_ID", nullable = false)
-    private String vehicleId;
     @Column(name = "SEAT_NUMBER", nullable = false)
     private String seatNumber;
     @Column(name = "SEAT_TYPE", nullable = false)
     private String seatType;
+    @Column(name = "CURRENCY", length = 10)
+    private String currency;
     @Enumerated(EnumType.STRING)
     @Column(name = "STATUS")
     private TicketStatus status;

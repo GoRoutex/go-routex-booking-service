@@ -82,6 +82,21 @@ spring:
     backoff-multiplier: 2
 
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: ""
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+      connect-timeout: 30000 # Connection timeout (count in milliseconds)
+
+
+
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/routexhub}
     username: ${SPRING_DATASOURCE_USERNAME:routex}

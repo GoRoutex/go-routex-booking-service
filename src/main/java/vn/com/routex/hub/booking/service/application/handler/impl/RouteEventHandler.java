@@ -2,6 +2,8 @@ package vn.com.routex.hub.booking.service.application.handler.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import vn.com.routex.hub.booking.service.application.handler.RouteEvent;
 import vn.com.routex.hub.booking.service.domain.seat.RouteSeat;
@@ -9,12 +11,16 @@ import vn.com.routex.hub.booking.service.domain.seat.RouteSeatRepository;
 import vn.com.routex.hub.booking.service.domain.seat.SeatStatus;
 import vn.com.routex.hub.booking.service.domain.vehicle.Vehicle;
 import vn.com.routex.hub.booking.service.domain.vehicle.VehicleRepository;
+import vn.com.routex.hub.booking.service.infrastructure.cache.redis.models.RouteCacheSeat;
+import vn.com.routex.hub.booking.service.infrastructure.cache.redis.service.RouteSeatCacheService;
+import vn.com.routex.hub.booking.service.infrastructure.kafka.event.RouteSeatGeneratedEvent;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.event.RouteSellableEvent;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.model.KafkaEventMessage;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.exception.BusinessException;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.log.SystemLog;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.ExceptionUtils;
 
+import java.beans.EventHandler;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,12 +32,13 @@ import static vn.com.routex.hub.booking.service.infrastructure.persistence.const
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.VEHICLE_NOT_FOUND;
 
 
-@Service
+@Component
 @RequiredArgsConstructor
 public class RouteEventHandler implements RouteEvent {
 
     private final VehicleRepository vehicleRepository;
     private final RouteSeatRepository routeSeatRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
@@ -57,7 +64,19 @@ public class RouteEventHandler implements RouteEvent {
                         .creator(payload.data().creator())
                         .build())
                 .collect(Collectors.toList());
-        routeSeatRepository.saveAll(seats);
+        List<RouteSeat> savedSeats = routeSeatRepository.saveAll(seats);
+
+        List<RouteCacheSeat> cacheData = savedSeats.stream()
+                .map(seat -> RouteCacheSeat.builder()
+                        .routeId(seat.getRouteId())
+                        .seatNo(seat.getSeatNo())
+                        .status(seat.getStatus())
+                        .build())
+                .toList();
+
+        sLog.info("[ROUTE-CACHE] Route Seat Cache Data: {}", cacheData);
+        // Publish event then put cache after COMMIT
+        applicationEventPublisher.publishEvent(new RouteSeatGeneratedEvent(payload.data().routeId(), cacheData));
     }
 
     private List<String> generateSeatNos(Vehicle vehicle) {
