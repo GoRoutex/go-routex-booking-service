@@ -9,7 +9,7 @@ spring:
 
   kafka:
     # K8s: set KAFKA_BOOTSTRAP_SERVERS = kafka:9092 (hoặc service của bạn)
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVER:localhost:9092}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -84,7 +84,7 @@ spring:
 
   data:
     redis:
-      host: localhost
+      host: ${REDIS_HOST:localhost}
       port: 6379
       password: ""
       lettuce:
@@ -148,7 +148,7 @@ server:
 
 identity:
   jwt:
-    secret: ${JWT_SECRET:CZZRadv0Xe8z3stWFWYdtiJ2E86gUgJvFEfbCYFgJhQ}
+    secret: ${JWT_SECRET}
     issuer: ${JWT_ISSUER:user-service}
     audience: ${JWT_AUDIENCE:management-service}
     authority-claim-name: ${JWT_CLAIM_NAME:roles}
