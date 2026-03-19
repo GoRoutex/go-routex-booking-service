@@ -33,7 +33,7 @@ node_modules/
 # ===== Env / Secret =====
 .env
 *.env
-application-*.yml
+!application-*.yml
 !application.yml
 !application-dev.yml
 !application-prod.yml
