@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import vn.com.routex.hub.booking.service.controller.models.base.BaseResponse;
+import vn.com.routex.hub.booking.service.domain.seat.SeatStatus;
 
 import java.util.List;
 
@@ -21,7 +22,7 @@ public class GetAllSeatResponse extends BaseResponse<List<GetAllSeatResponse.Get
     public static class GetAvailableSeatResponseData {
         private String routeId;
         private String seatNo;
-        private String status;
+        private SeatStatus status;
         private String ticketId;
     }
 }

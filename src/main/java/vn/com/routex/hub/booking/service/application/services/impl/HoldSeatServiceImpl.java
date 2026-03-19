@@ -4,7 +4,11 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import vn.com.routex.hub.booking.service.application.services.BookingService;
-import vn.com.routex.hub.booking.service.application.services.RouteSeatManagementService;
+import vn.com.routex.hub.booking.service.application.services.HoldSeatService;
+import vn.com.routex.hub.booking.service.controller.models.booking.CreateBookingRequest;
+import vn.com.routex.hub.booking.service.controller.models.result.ApiResult;
+import vn.com.routex.hub.booking.service.controller.models.seat.HoldSeatRequest;
+import vn.com.routex.hub.booking.service.controller.models.seat.HoldSeatResponse;
 import vn.com.routex.hub.booking.service.domain.booking.Booking;
 import vn.com.routex.hub.booking.service.domain.seat.RouteSeat;
 import vn.com.routex.hub.booking.service.domain.seat.RouteSeatRepository;
@@ -12,12 +16,6 @@ import vn.com.routex.hub.booking.service.domain.seat.SeatStatus;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.exception.BusinessException;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.log.SystemLog;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.ExceptionUtils;
-import vn.com.routex.hub.booking.service.controller.models.booking.CreateBookingRequest;
-import vn.com.routex.hub.booking.service.controller.models.result.ApiResult;
-import vn.com.routex.hub.booking.service.controller.models.seat.GetAllSeatRequest;
-import vn.com.routex.hub.booking.service.controller.models.seat.GetAllSeatResponse;
-import vn.com.routex.hub.booking.service.controller.models.seat.HoldSeatRequest;
-import vn.com.routex.hub.booking.service.controller.models.seat.HoldSeatResponse;
 
 import java.time.OffsetDateTime;
 import java.util.Comparator;
@@ -29,7 +27,6 @@ import java.util.stream.Collectors;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.INVALID_INPUT_ERROR;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.INVALID_SEAT_NO;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.RECORD_NOT_FOUND;
-import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.ROUTE_SEAT_NOT_FOUND;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.SEAT_NOT_AVAILABLE;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.SEAT_NOT_FOUND;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.SUCCESS_CODE;
@@ -37,43 +34,11 @@ import static vn.com.routex.hub.booking.service.infrastructure.persistence.const
 
 @Service
 @RequiredArgsConstructor
-public class RouteSeatManagementServiceImpl implements RouteSeatManagementService {
+public class HoldSeatServiceImpl implements HoldSeatService {
 
     private final RouteSeatRepository routeSeatRepository;
     private final BookingService bookingService;
-
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
-
-    @Override
-    public GetAllSeatResponse getAllSeat(GetAllSeatRequest request) {
-
-        sLog.info("[BOOK-SERVICE] Get All Seat Request: {}", request);
-        List<RouteSeat> routeSeatList = routeSeatRepository.findAllByRouteIdOrderBySeatNoAsc(request.getData().getRouteId());
-
-        if(routeSeatList.isEmpty()) {
-            throw new BusinessException(request.getRequestId(), request.getRequestDateTime(), request.getChannel(),
-                    ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(ROUTE_SEAT_NOT_FOUND, request.getData().getRouteId())));
-        }
-        List<GetAllSeatResponse.GetAvailableSeatResponseData> responseDataList = routeSeatList
-                .stream()
-                .map(rs -> GetAllSeatResponse.GetAvailableSeatResponseData.builder()
-                        .routeId(rs.getRouteId())
-                        .seatNo(rs.getSeatNo())
-                        .status(rs.getStatus().name())
-                        .build())
-                .collect(Collectors.toList());
-
-        return GetAllSeatResponse.builder()
-                .requestId(request.getRequestId())
-                .requestDateTime(request.getRequestDateTime())
-                .channel(request.getChannel())
-                .result(ApiResult.builder()
-                        .responseCode(SUCCESS_CODE)
-                        .description(SUCCESS_MESSAGE)
-                        .build())
-                .data(responseDataList)
-                .build();
-    }
 
     @Override
     @Transactional
@@ -81,13 +46,12 @@ public class RouteSeatManagementServiceImpl implements RouteSeatManagementServic
         String routeId = request.getData().getRouteId();
         String holdToken = UUID.randomUUID().toString();
 
-
         sLog.info("[BOOK-SERVICE] Hold Seat Request: {}", request);
         List<String> requestedSeatNos = request.getData().getSeatNos();
 
         if(requestedSeatNos == null || requestedSeatNos.isEmpty()) {
             throw new BusinessException(request.getRequestId(),
-                     request.getRequestDateTime(), request.getChannel(),
+                    request.getRequestDateTime(), request.getChannel(),
                     ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_SEAT_NO));
         }
         // Normalize requested Seat Nos

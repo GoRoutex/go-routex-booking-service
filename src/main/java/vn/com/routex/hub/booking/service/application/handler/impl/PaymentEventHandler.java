@@ -1,7 +1,7 @@
 package vn.com.routex.hub.booking.service.application.handler.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import vn.com.routex.hub.booking.service.application.handler.PaymentEvent;
 import vn.com.routex.hub.booking.service.domain.booking.Booking;
@@ -10,6 +10,8 @@ import vn.com.routex.hub.booking.service.domain.booking.BookingSeat;
 import vn.com.routex.hub.booking.service.domain.booking.BookingSeatRepository;
 import vn.com.routex.hub.booking.service.domain.booking.BookingSeatStatus;
 import vn.com.routex.hub.booking.service.domain.booking.BookingStatus;
+import vn.com.routex.hub.booking.service.domain.payment.Payment;
+import vn.com.routex.hub.booking.service.domain.payment.PaymentRepository;
 import vn.com.routex.hub.booking.service.domain.seat.RouteSeat;
 import vn.com.routex.hub.booking.service.domain.seat.RouteSeatRepository;
 import vn.com.routex.hub.booking.service.domain.seat.SeatStatus;
@@ -25,18 +27,21 @@ import static vn.com.routex.hub.booking.service.infrastructure.persistence.const
 
 
 @RequiredArgsConstructor
-@Service
+@Component
 public class PaymentEventHandler implements PaymentEvent {
 
     private final BookingRepository bookingRepository;
     private final RouteSeatRepository routeSeatRepository;
     private final BookingSeatRepository bookingSeatRepository;
+    private final PaymentRepository paymentRepository;
 
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
+
     @Override
     @Transactional
     public void updateSuccessPayment(KafkaEventMessage<PaymentSuccessEvent> event) {
         BookingAggregate aggregate = loadAggregate(
+                event.data().paymentId(),
                 event.data().bookingId(),
                 event.requestId(),
                 event.requestDateTime(),
@@ -61,6 +66,7 @@ public class PaymentEventHandler implements PaymentEvent {
     @Transactional
     public void updateFailEvent(KafkaEventMessage<PaymentFailedEvent> event) {
         BookingAggregate aggregate = loadAggregate(
+                event.data().paymentId(),
                 event.data().bookingId(),
                 event.requestId(),
                 event.requestDateTime(),
@@ -82,11 +88,19 @@ public class PaymentEventHandler implements PaymentEvent {
     }
 
     private BookingAggregate loadAggregate(
+            String paymentId,
             String bookingId,
             String requestId,
             String requestDateTime,
             String channel
     ) {
+
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new BusinessException(
+                        requestId, requestDateTime, channel,
+                        ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, "Payment not found")
+                ));
+
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new BusinessException(
                         requestId, requestDateTime, channel,
@@ -106,12 +120,13 @@ public class PaymentEventHandler implements PaymentEvent {
                         ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, "Route Seat not found")
                 ));
 
-        return new BookingAggregate(booking, bookingSeat, routeSeat);
+        return new BookingAggregate(payment, booking, bookingSeat, routeSeat);
     }
 
     private void saveAggregate(BookingAggregate aggregate) {
         routeSeatRepository.save(aggregate.routeSeat());
         bookingSeatRepository.save(aggregate.bookingSeat());
         bookingRepository.save(aggregate.booking());
+        paymentRepository.save(aggregate.payment());
     }
 }

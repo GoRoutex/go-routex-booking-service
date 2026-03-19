@@ -33,8 +33,7 @@ public class PaymentEventConsumer {
 
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
-    @KafkaListener(topics = "${spring.kafka.topics.payment-success}",
-    groupId = "${spring.kafka.group-id.payments}")
+    @KafkaListener(topics = "${spring.kafka.topics.payment-success}", groupId = "${spring.kafka.group-id.payments}")
     public void paymentCompletedConsumer(String payload) {
         KafkaEventMessage<PaymentSuccessEvent>  event =
                 JsonUtils.parseToKafkaObject(
@@ -77,8 +76,7 @@ public class PaymentEventConsumer {
         // Publish event for analytics
     }
 
-    @KafkaListener(topics = "${spring.kafka.topics.payment-failed}",
-            groupId = "${spring.kafka.group-id.payments}")
+    @KafkaListener(topics = "${spring.kafka.topics.payment-failed}", groupId = "${spring.kafka.group-id.payments}")
     public void paymentFailedConsumer(String payload) {
         KafkaEventMessage<PaymentFailedEvent>  event =
                 JsonUtils.parseToKafkaObject(
