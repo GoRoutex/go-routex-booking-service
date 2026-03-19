@@ -1,5 +1,4 @@
 spring:
-
   application:
     name: go-routex-booking-service
 
@@ -8,8 +7,6 @@ spring:
       enabled: true
 
   kafka:
-    # K8s: set KAFKA_BOOTSTRAP_SERVERS = kafka:9092 (hoặc service của bạn)
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVER:localhost:9092}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -22,7 +19,6 @@ spring:
         linger.ms: 10
 
     consumer:
-      group-id: ${KAFKA_CONSUMER_GROUP_ID:driver-service}
       auto-offset-reset: earliest
       enable-auto-commit: false
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
@@ -35,24 +31,17 @@ spring:
 
     events:
       route-ready-for-sale: "routex.route.ready-for-sale"
-      # Booking Events
       booking-created: "routex.booking.created"
       booking-confirmed: "routex.booking.confirmed"
       booking-cancelled: "routex.booking.cancelled"
       booking-failed: "routex.booking.failed"
-
-      # Payment Events
       payment-initiated: "routex.payment.initiated"
       payment-completed: "routex.payment.completed"
       payment-failed: "routex.payment.failed"
       payment-refunded: "routex.payment.refunded"
-
-      # Seat Events
       seat-reserved: "routex.seat.reserved"
       seat-released: "routex.seat.released"
       seat-locked: "routex.seat.locked"
-
-      # Notification Events
       notification-email: "routex.notification.email"
       notification-sms: "routex.notification.sms"
       notification-activities: "routex.notification.activities"
@@ -70,53 +59,23 @@ spring:
       bookings: booking-service
       payments: payment-service
 
-
-
     listener:
       ack-mode: manual
 
-  # Retry Configuration
   retry:
     max-attempts: 3
     backoff-ms: 1000
     backoff-multiplier: 2
 
-
-  data:
-    redis:
-      host: ${REDIS_HOST:localhost}
-      port: 6379
-      password: ""
-      lettuce:
-        pool:
-          max-active: 8
-          max-idle: 8
-          min-idle: 0
-          max-wait: -1ms
-      connect-timeout: 30000 # Connection timeout (count in milliseconds)
-
-
-
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/routexhub}
-    username: ${SPRING_DATASOURCE_USERNAME:routex}
-    password: ${SPRING_DATASOURCE_PASSWORD:routex@2026}
     driver-class-name: org.postgresql.Driver
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
-    hibernate:
-      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
-    show-sql: ${SPRING_JPA_SHOW_SQL:false}
 
   jackson:
     mapper:
       sort-properties-alphabetically: false
-
-  security:
-    user:
-      name: ${SPRING_SECURITY_USER_NAME:admin}
-      password: ${SPRING_SECURITY_USER_PASSWORD:admin}
 
 management:
   endpoint:
