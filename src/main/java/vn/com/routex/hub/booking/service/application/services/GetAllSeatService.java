@@ -1,9 +1,9 @@
 package vn.com.routex.hub.booking.service.application.services;
 
 
-import vn.com.routex.hub.booking.service.controller.models.seat.GetAllSeatRequest;
-import vn.com.routex.hub.booking.service.controller.models.seat.GetAllSeatResponse;
+import vn.com.routex.hub.booking.service.application.dto.seat.GetAllSeatQuery;
+import vn.com.routex.hub.booking.service.application.dto.seat.GetAllSeatResult;
 
 public interface GetAllSeatService {
-    GetAllSeatResponse getAllSeat(GetAllSeatRequest request);
+    GetAllSeatResult getAllSeat(GetAllSeatQuery query);
 }

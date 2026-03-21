@@ -1,5 +1,4 @@
-package vn.com.routex.hub.booking.service.domain.seat;
-
+package vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.seat.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,6 +13,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import vn.com.routex.hub.booking.service.domain.seat.SeatStatus;
 
 @Getter
 @Setter
@@ -22,11 +22,11 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @Entity
 @Table(name = "ROUTE_SEAT")
-public class RouteSeat {
+public class RouteSeatJpaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     @Column(name = "ROUTE_ID")
     private String routeId;
@@ -40,5 +40,4 @@ public class RouteSeat {
 
     @Column(name = "CREATOR")
     private String creator;
-
 }

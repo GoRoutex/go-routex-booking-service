@@ -1,5 +1,4 @@
-package vn.com.routex.hub.booking.service.domain.booking;
-
+package vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.booking.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,6 +12,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import vn.com.routex.hub.booking.service.domain.auditing.AbstractAuditingEntity;
+import vn.com.routex.hub.booking.service.domain.booking.BookingStatus;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -24,7 +24,7 @@ import java.time.OffsetDateTime;
 @SuperBuilder
 @Entity
 @Table(name = "BOOKING")
-public class Booking extends AbstractAuditingEntity {
+public class BookingJpaEntity extends AbstractAuditingEntity {
     @Id
     private String id;
 
