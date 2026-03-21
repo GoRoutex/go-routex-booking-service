@@ -1,9 +1,9 @@
 package vn.com.routex.hub.booking.service.application.services;
 
-import vn.com.routex.hub.booking.service.controller.models.seat.HoldSeatRequest;
-import vn.com.routex.hub.booking.service.controller.models.seat.HoldSeatResponse;
+import vn.com.routex.hub.booking.service.application.dto.seat.HoldSeatCommand;
+import vn.com.routex.hub.booking.service.application.dto.seat.HoldSeatResult;
 
 public interface HoldSeatService {
 
-    HoldSeatResponse holdSeat(HoldSeatRequest request);
+    HoldSeatResult holdSeat(HoldSeatCommand command);
 }

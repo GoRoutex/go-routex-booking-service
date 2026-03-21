@@ -1,4 +1,8 @@
 spring:
+  config:
+    activate:
+      on-profile: dev
+
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVER:kafka:9092}
     consumer:

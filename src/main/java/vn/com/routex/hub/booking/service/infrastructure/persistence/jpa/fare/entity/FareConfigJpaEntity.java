@@ -1,4 +1,4 @@
-package vn.com.routex.hub.booking.service.domain.fare;
+package vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.fare.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,11 +21,12 @@ import java.math.BigDecimal;
 @SuperBuilder
 @Entity
 @Table(name = "FARE_CONFIG")
-public class FareConfig {
+public class FareConfigJpaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
+
     @Column(name = "VEHICLE_TYPE", nullable = false, unique = true)
     private String vehicleType;
 

@@ -1,10 +1,10 @@
 package vn.com.routex.hub.booking.service.infrastructure.kafka.record;
 
 
-import vn.com.routex.hub.booking.service.domain.booking.Booking;
-import vn.com.routex.hub.booking.service.domain.booking.BookingSeat;
+import vn.com.routex.hub.booking.service.domain.booking.model.Booking;
+import vn.com.routex.hub.booking.service.domain.booking.model.BookingSeat;
 import vn.com.routex.hub.booking.service.domain.payment.Payment;
-import vn.com.routex.hub.booking.service.domain.seat.RouteSeat;
+import vn.com.routex.hub.booking.service.domain.seat.model.RouteSeat;
 
 public record BookingAggregate(
         Payment payment,

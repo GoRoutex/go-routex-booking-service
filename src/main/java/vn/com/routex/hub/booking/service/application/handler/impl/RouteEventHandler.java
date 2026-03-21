@@ -4,15 +4,13 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import vn.com.routex.hub.booking.service.application.handler.RouteEvent;
-import vn.com.routex.hub.booking.service.domain.seat.RouteSeat;
-import vn.com.routex.hub.booking.service.domain.seat.RouteSeatRepository;
 import vn.com.routex.hub.booking.service.domain.seat.SeatStatus;
-import vn.com.routex.hub.booking.service.domain.vehicle.Vehicle;
-import vn.com.routex.hub.booking.service.domain.vehicle.VehicleRepository;
+import vn.com.routex.hub.booking.service.domain.seat.model.RouteSeat;
+import vn.com.routex.hub.booking.service.domain.seat.port.RouteSeatRepositoryPort;
+import vn.com.routex.hub.booking.service.domain.vehicle.model.VehicleProfile;
+import vn.com.routex.hub.booking.service.domain.vehicle.port.VehicleRepositoryPort;
 import vn.com.routex.hub.booking.service.infrastructure.cache.redis.models.RouteCacheSeat;
-import vn.com.routex.hub.booking.service.infrastructure.cache.redis.service.RouteSeatCacheService;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.event.RouteSeatGeneratedEvent;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.event.RouteSellableEvent;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.model.KafkaEventMessage;
@@ -20,10 +18,8 @@ import vn.com.routex.hub.booking.service.infrastructure.persistence.exception.Bu
 import vn.com.routex.hub.booking.service.infrastructure.persistence.log.SystemLog;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.ExceptionUtils;
 
-import java.beans.EventHandler;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.DUPLICATE_ERROR;
@@ -31,13 +27,12 @@ import static vn.com.routex.hub.booking.service.infrastructure.persistence.const
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.ROUTE_SEAT_EXIST;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.VEHICLE_NOT_FOUND;
 
-
 @Component
 @RequiredArgsConstructor
 public class RouteEventHandler implements RouteEvent {
 
-    private final VehicleRepository vehicleRepository;
-    private final RouteSeatRepository routeSeatRepository;
+    private final VehicleRepositoryPort vehicleRepositoryPort;
+    private final RouteSeatRepositoryPort routeSeatRepositoryPort;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
@@ -45,26 +40,24 @@ public class RouteEventHandler implements RouteEvent {
     @Override
     @Transactional
     public void generateRouteSeat(KafkaEventMessage<RouteSellableEvent> payload) {
-        Vehicle vehicle = vehicleRepository.findById(payload.data().vehicleId())
+        VehicleProfile vehicle = vehicleRepositoryPort.findById(payload.data().vehicleId())
                 .orElseThrow(() -> new BusinessException(payload.requestId(), payload.requestDateTime(), payload.channel(),
                         ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, VEHICLE_NOT_FOUND)));
 
-        if(routeSeatRepository.existsByRouteId(payload.data().routeId())) {
+        if (routeSeatRepositoryPort.existsByRouteId(payload.data().routeId())) {
             throw new BusinessException(payload.requestId(), payload.requestDateTime(), payload.channel(),
                     ExceptionUtils.buildResultResponse(DUPLICATE_ERROR, String.format(ROUTE_SEAT_EXIST, payload.data().routeId())));
         }
 
-        List<String> seatNos = generateSeatNos(vehicle);
-        sLog.info("[ROUTE-SEAT] RouteId {} Seat List {}", payload.data().routeId(), seatNos);
-        List<RouteSeat> seats = seatNos.stream()
+        List<RouteSeat> seats = generateSeatNos(vehicle).stream()
                 .map(seatNo -> RouteSeat.builder()
                         .routeId(payload.data().routeId())
                         .seatNo(seatNo)
                         .status(SeatStatus.AVAILABLE)
                         .creator(payload.data().creator())
                         .build())
-                .collect(Collectors.toList());
-        List<RouteSeat> savedSeats = routeSeatRepository.saveAll(seats);
+                .toList();
+        List<RouteSeat> savedSeats = routeSeatRepositoryPort.saveAll(seats);
 
         List<RouteCacheSeat> cacheData = savedSeats.stream()
                 .map(seat -> RouteCacheSeat.builder()
@@ -75,17 +68,18 @@ public class RouteEventHandler implements RouteEvent {
                 .toList();
 
         sLog.info("[ROUTE-CACHE] Route Seat Cache Data: {}", cacheData);
-        // Publish event then put cache after COMMIT
         applicationEventPublisher.publishEvent(new RouteSeatGeneratedEvent(payload.data().routeId(), cacheData));
     }
 
-    private List<String> generateSeatNos(Vehicle vehicle) {
+    private List<String> generateSeatNos(VehicleProfile vehicle) {
         int seatCapacity = vehicle.getSeatCapacity();
         boolean hasFloor = vehicle.isHasFloor();
 
-        if(seatCapacity <= 0) return List.of();
+        if (seatCapacity <= 0) {
+            return List.of();
+        }
 
-        if(!hasFloor) {
+        if (!hasFloor) {
             return IntStream.rangeClosed(1, seatCapacity)
                     .mapToObj(i -> String.format("%02d", i))
                     .toList();
@@ -99,8 +93,6 @@ public class RouteEventHandler implements RouteEvent {
         for (int i = half + 1; i <= seatCapacity; i++) {
             seatNos.add("B" + String.format("%02d", i));
         }
-
-        sLog.info("SeatNos: {}", seatNos);
         return seatNos;
     }
 }

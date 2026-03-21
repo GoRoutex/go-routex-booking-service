@@ -1,4 +1,4 @@
-package vn.com.routex.hub.booking.service.domain.vehicle;
+package vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.vehicle.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,6 +12,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import vn.com.routex.hub.booking.service.domain.auditing.AbstractAuditingEntity;
+import vn.com.routex.hub.booking.service.domain.vehicle.VehicleStatus;
+import vn.com.routex.hub.booking.service.domain.vehicle.VehicleType;
 
 @Getter
 @Setter
@@ -20,7 +22,7 @@ import vn.com.routex.hub.booking.service.domain.auditing.AbstractAuditingEntity;
 @Entity
 @SuperBuilder
 @Table(name = "VEHICLE")
-public class Vehicle extends AbstractAuditingEntity {
+public class VehicleJpaEntity extends AbstractAuditingEntity {
 
     @Id
     private String id;
