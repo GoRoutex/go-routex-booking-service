@@ -2,11 +2,15 @@ package vn.com.routex.hub.booking.service.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.WebRequest;
 import vn.com.routex.hub.booking.service.application.dto.common.RequestMetadata;
 import vn.com.routex.hub.booking.service.application.dto.seat.GetAllSeatQuery;
 import vn.com.routex.hub.booking.service.application.dto.seat.GetAllSeatResult;
@@ -23,24 +27,31 @@ import vn.com.routex.hub.booking.service.controller.models.seat.HoldSeatRequest;
 import vn.com.routex.hub.booking.service.controller.models.seat.HoldSeatResponse;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.HttpResponseUtil;
 
+import java.util.List;
+
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ApiConstant.API_PATH;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ApiConstant.API_VERSION;
+import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ApiConstant.BOOKING_PATH;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ApiConstant.HOLD_SEAT_PATH;
-import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ApiConstant.MANAGEMENT_PATH;
-import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ApiConstant.ROUTE_SERVICE;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ApiConstant.SEAT_PATH;
+import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ApiConstant.TRIP_PATH;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.SUCCESS_CODE;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.SUCCESS_MESSAGE;
 
 @RestController
-@RequestMapping(API_PATH + API_VERSION + MANAGEMENT_PATH)
+@RequestMapping(API_PATH + API_VERSION + BOOKING_PATH)
 @RequiredArgsConstructor
 public class RouteSeatManagementController {
 
     private final GetAllSeatService getAllSeatService;
     private final HoldSeatService holdSeatService;
 
-    @PostMapping(ROUTE_SERVICE + SEAT_PATH)
+    @InitBinder
+    public void initBinder(WebDataBinder webDataBinder, WebRequest webRequest) {
+        webDataBinder.setDisallowedFields("requestId", "requestDateTime", "channel", "data");
+    }
+
+    @PostMapping(TRIP_PATH + SEAT_PATH)
     public ResponseEntity<GetAllSeatResponse> getAvailableSeat(@Valid @RequestBody GetAllSeatRequest request) {
         GetAllSeatResult result = getAllSeatService.getAllSeat(GetAllSeatQuery.builder()
                 .metadata(toMetadata(request))
@@ -54,7 +65,7 @@ public class RouteSeatManagementController {
         return HttpResponseUtil.buildResponse(request, response);
     }
 
-    @PostMapping(ROUTE_SERVICE + HOLD_SEAT_PATH)
+    @PostMapping(TRIP_PATH + HOLD_SEAT_PATH)
     public ResponseEntity<HoldSeatResponse> holdSeat(@Valid @RequestBody HoldSeatRequest request) {
         HoldSeatResult result = holdSeatService.holdSeat(HoldSeatCommand.builder()
                 .metadata(toMetadata(request))
@@ -69,15 +80,9 @@ public class RouteSeatManagementController {
                 .currency(request.getInfo().getCurrency())
                 .build());
 
-        java.util.List<HoldSeatResponse.HoldSeatResponseData> responseData = result.seats().stream()
+        List<HoldSeatResponse.HoldSeatResponseData> responseData = result.seats().stream()
                 .map(item -> {
-                    HoldSeatResponse.HoldSeatResponseBookingInfo bookingInfo = new HoldSeatResponse.HoldSeatResponseBookingInfo();
-                    bookingInfo.setBookingId(item.booking().bookingId());
-                    bookingInfo.setBookingCode(item.booking().bookingCode());
-                    bookingInfo.setHoldUntil(item.booking().holdUntil());
-                    bookingInfo.setSeatCount(item.booking().seatCount());
-                    bookingInfo.setTotalAmount(item.booking().totalAmount());
-                    bookingInfo.setCurrency(item.booking().currency());
+                    HoldSeatResponse.HoldSeatResponseBookingInfo bookingInfo = getHoldSeatResponseBookingInfo(item);
 
                     HoldSeatResponse.HoldSeatResponseData data = new HoldSeatResponse.HoldSeatResponseData();
                     data.setRouteId(item.routeId());
@@ -94,6 +99,17 @@ public class RouteSeatManagementController {
         response.setData(responseData);
 
         return HttpResponseUtil.buildResponse(request, response);
+    }
+
+    private static HoldSeatResponse.HoldSeatResponseBookingInfo getHoldSeatResponseBookingInfo(HoldSeatResult.HoldSeatItemResult item) {
+        HoldSeatResponse.HoldSeatResponseBookingInfo bookingInfo = new HoldSeatResponse.HoldSeatResponseBookingInfo();
+        bookingInfo.setBookingId(item.booking().bookingId());
+        bookingInfo.setBookingCode(item.booking().bookingCode());
+        bookingInfo.setHoldUntil(item.booking().holdUntil());
+        bookingInfo.setSeatCount(item.booking().seatCount());
+        bookingInfo.setTotalAmount(item.booking().totalAmount());
+        bookingInfo.setCurrency(item.booking().currency());
+        return bookingInfo;
     }
 
     private RequestMetadata toMetadata(BaseRequest request) {
