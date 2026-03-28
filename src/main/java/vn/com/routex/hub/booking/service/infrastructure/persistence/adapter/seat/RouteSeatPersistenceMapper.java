@@ -2,12 +2,12 @@ package vn.com.routex.hub.booking.service.infrastructure.persistence.adapter.sea
 
 import org.springframework.stereotype.Component;
 import vn.com.routex.hub.booking.service.domain.seat.model.RouteSeat;
-import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.seat.entity.RouteSeatJpaEntity;
+import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.seat.entity.RouteSeatEntity;
 
 @Component
 public class RouteSeatPersistenceMapper {
 
-    public RouteSeat toDomain(RouteSeatJpaEntity entity) {
+    public RouteSeat toDomain(RouteSeatEntity entity) {
         return RouteSeat.builder()
                 .id(entity.getId())
                 .routeId(entity.getRouteId())
@@ -17,8 +17,8 @@ public class RouteSeatPersistenceMapper {
                 .build();
     }
 
-    public RouteSeatJpaEntity toJpaEntity(RouteSeat routeSeat) {
-        return RouteSeatJpaEntity.builder()
+    public RouteSeatEntity toJpaEntity(RouteSeat routeSeat) {
+        return RouteSeatEntity.builder()
                 .id(routeSeat.getId())
                 .routeId(routeSeat.getRouteId())
                 .seatNo(routeSeat.getSeatNo())

@@ -10,11 +10,12 @@ import vn.com.routex.hub.booking.service.domain.booking.model.Booking;
 import vn.com.routex.hub.booking.service.domain.booking.model.BookingSeat;
 import vn.com.routex.hub.booking.service.domain.booking.port.BookingRepositoryPort;
 import vn.com.routex.hub.booking.service.domain.booking.port.BookingSeatRepositoryPort;
-import vn.com.routex.hub.booking.service.domain.payment.Payment;
-import vn.com.routex.hub.booking.service.domain.payment.PaymentRepository;
+import vn.com.routex.hub.booking.service.domain.payment.model.Payment;
+import vn.com.routex.hub.booking.service.domain.payment.port.PaymentRepositoryPort;
 import vn.com.routex.hub.booking.service.domain.seat.SeatStatus;
 import vn.com.routex.hub.booking.service.domain.seat.model.RouteSeat;
 import vn.com.routex.hub.booking.service.domain.seat.port.RouteSeatRepositoryPort;
+import vn.com.routex.hub.booking.service.domain.ticket.port.TicketRepositoryPort;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.event.PaymentFailedEvent;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.event.PaymentSuccessEvent;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.model.KafkaEventMessage;
@@ -32,10 +33,16 @@ public class PaymentEventHandler implements PaymentEvent {
     private final BookingRepositoryPort bookingRepositoryPort;
     private final RouteSeatRepositoryPort routeSeatRepositoryPort;
     private final BookingSeatRepositoryPort bookingSeatRepositoryPort;
-    private final PaymentRepository paymentRepository;
+    private final PaymentRepositoryPort paymentRepositoryPort;
+    private final TicketRepositoryPort ticketRepositoryPort;
 
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
+
+    /**
+     * Update status for Booking, BookingSeat, RouteSeat after success payment
+     * @param event
+     */
     @Override
     @Transactional
     public void updateSuccessPayment(KafkaEventMessage<PaymentSuccessEvent> event) {
@@ -55,8 +62,8 @@ public class PaymentEventHandler implements PaymentEvent {
         aggregate.routeSeat().setStatus(SeatStatus.SOLD);
         aggregate.bookingSeat().setStatus(BookingSeatStatus.RESERVED);
         aggregate.booking().setStatus(BookingStatus.CONFIRMED);
-
         saveAggregate(aggregate);
+        // TODO: Create ticket after payment success (domain port currently only exposes code generation).
     }
 
     @Override
@@ -86,10 +93,10 @@ public class PaymentEventHandler implements PaymentEvent {
             String paymentId,
             String bookingId,
             String requestId,
-            String requestDateTime,
-            String channel
+        String requestDateTime,
+        String channel
     ) {
-        Payment payment = paymentRepository.findById(paymentId)
+        Payment payment = paymentRepositoryPort.findById(paymentId)
                 .orElseThrow(() -> new BusinessException(
                         requestId, requestDateTime, channel,
                         ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, "Payment not found")
@@ -120,6 +127,6 @@ public class PaymentEventHandler implements PaymentEvent {
         routeSeatRepositoryPort.save(aggregate.routeSeat());
         bookingSeatRepositoryPort.save(aggregate.bookingSeat());
         bookingRepositoryPort.save(aggregate.booking());
-        paymentRepository.save(aggregate.payment());
+        paymentRepositoryPort.save(aggregate.payment());
     }
 }

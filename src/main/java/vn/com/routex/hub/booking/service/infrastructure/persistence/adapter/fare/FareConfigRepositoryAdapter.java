@@ -3,7 +3,7 @@ package vn.com.routex.hub.booking.service.infrastructure.persistence.adapter.far
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import vn.com.routex.hub.booking.service.domain.fare.port.FareConfigPort;
-import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.fare.repository.FareConfigJpaRepository;
+import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.fare.repository.FareConfigEntityRepository;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -12,7 +12,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class FareConfigRepositoryAdapter implements FareConfigPort {
 
-    private final FareConfigJpaRepository fareConfigJpaRepository;
+    private final FareConfigEntityRepository fareConfigJpaRepository;
 
     @Override
     public Optional<BigDecimal> findBasePriceByVehicleType(String vehicleType) {

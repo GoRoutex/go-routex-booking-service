@@ -1,9 +1,9 @@
 package vn.com.routex.hub.booking.service.domain.ticket;
 
 public enum TicketStatus {
-    ACTIVE,
-    USED,
+    ISSUED,
+    CHECKED_IN,
+    BOARDED,
     CANCELLED,
-    REFUNDED,
     EXPIRED
 }
