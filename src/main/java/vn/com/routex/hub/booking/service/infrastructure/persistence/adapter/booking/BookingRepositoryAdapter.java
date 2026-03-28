@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import vn.com.routex.hub.booking.service.domain.booking.model.Booking;
 import vn.com.routex.hub.booking.service.domain.booking.port.BookingRepositoryPort;
-import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.booking.repository.BookingJpaRepository;
+import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.booking.repository.BookingEntityRepository;
 
 import java.util.Optional;
 
@@ -12,7 +12,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class BookingRepositoryAdapter implements BookingRepositoryPort {
 
-    private final BookingJpaRepository bookingJpaRepository;
+    private final BookingEntityRepository bookingJpaRepository;
     private final BookingPersistenceMapper bookingPersistenceMapper;
 
     @Override

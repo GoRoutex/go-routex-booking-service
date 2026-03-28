@@ -2,12 +2,12 @@ package vn.com.routex.hub.booking.service.infrastructure.persistence.adapter.veh
 
 import org.springframework.stereotype.Component;
 import vn.com.routex.hub.booking.service.domain.vehicle.model.VehicleProfile;
-import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.vehicle.entity.VehicleJpaEntity;
+import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.vehicle.entity.VehicleEntity;
 
 @Component
 public class VehiclePersistenceMapper {
 
-    public VehicleProfile toDomain(VehicleJpaEntity entity) {
+    public VehicleProfile toDomain(VehicleEntity entity) {
         return VehicleProfile.builder()
                 .id(entity.getId())
                 .creator(entity.getCreator())

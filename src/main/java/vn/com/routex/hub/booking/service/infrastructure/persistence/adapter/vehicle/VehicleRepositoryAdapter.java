@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import vn.com.routex.hub.booking.service.domain.vehicle.model.VehicleProfile;
 import vn.com.routex.hub.booking.service.domain.vehicle.port.VehicleRepositoryPort;
-import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.vehicle.repository.VehicleJpaRepository;
+import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.vehicle.repository.VehicleEntityRepository;
 
 import java.util.Optional;
 
@@ -12,7 +12,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class VehicleRepositoryAdapter implements VehicleRepositoryPort {
 
-    private final VehicleJpaRepository vehicleJpaRepository;
+    private final VehicleEntityRepository vehicleJpaRepository;
     private final VehiclePersistenceMapper vehiclePersistenceMapper;
 
     @Override

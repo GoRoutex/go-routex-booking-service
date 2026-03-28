@@ -3,13 +3,13 @@ package vn.com.routex.hub.booking.service.infrastructure.persistence.adapter.boo
 import org.springframework.stereotype.Component;
 import vn.com.routex.hub.booking.service.domain.booking.model.Booking;
 import vn.com.routex.hub.booking.service.domain.booking.model.BookingSeat;
-import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.booking.entity.BookingJpaEntity;
-import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.booking.entity.BookingSeatJpaEntity;
+import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.booking.entity.BookingEntity;
+import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.booking.entity.BookingSeatEntity;
 
 @Component
 public class BookingPersistenceMapper {
 
-    public Booking toDomain(BookingJpaEntity entity) {
+    public Booking toDomain(BookingEntity entity) {
         return Booking.builder()
                 .id(entity.getId())
                 .bookingCode(entity.getBookingCode())
@@ -27,8 +27,8 @@ public class BookingPersistenceMapper {
                 .build();
     }
 
-    public BookingJpaEntity toJpaEntity(Booking booking) {
-        return BookingJpaEntity.builder()
+    public BookingEntity toJpaEntity(Booking booking) {
+        return BookingEntity.builder()
                 .id(booking.getId())
                 .bookingCode(booking.getBookingCode())
                 .routeId(booking.getRouteId())
@@ -45,7 +45,7 @@ public class BookingPersistenceMapper {
                 .build();
     }
 
-    public BookingSeat toDomain(BookingSeatJpaEntity entity) {
+    public BookingSeat toDomain(BookingSeatEntity entity) {
         return BookingSeat.builder()
                 .id(entity.getId())
                 .bookingId(entity.getBookingId())
@@ -57,8 +57,8 @@ public class BookingPersistenceMapper {
                 .build();
     }
 
-    public BookingSeatJpaEntity toJpaEntity(BookingSeat bookingSeat) {
-        return BookingSeatJpaEntity.builder()
+    public BookingSeatEntity toJpaEntity(BookingSeat bookingSeat) {
+        return BookingSeatEntity.builder()
                 .id(bookingSeat.getId())
                 .bookingId(bookingSeat.getBookingId())
                 .routeId(bookingSeat.getRouteId())
