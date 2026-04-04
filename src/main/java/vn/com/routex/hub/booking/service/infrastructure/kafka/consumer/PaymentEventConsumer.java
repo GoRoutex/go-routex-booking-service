@@ -33,7 +33,11 @@ public class PaymentEventConsumer {
 
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
-    @KafkaListener(topics = "${spring.kafka.topics.payment-success}", groupId = "${spring.kafka.group-id.payments}")
+    @KafkaListener(
+            topics = "${spring.kafka.topics.payment-success}",
+            containerFactory = "kafkaListenerContainerFactory",
+            groupId = "${spring.kafka.group-id.payments}"
+    )
     public void paymentCompletedConsumer(String payload) {
         KafkaEventMessage<PaymentSuccessEvent>  event =
                 JsonUtils.parseToKafkaObject(
