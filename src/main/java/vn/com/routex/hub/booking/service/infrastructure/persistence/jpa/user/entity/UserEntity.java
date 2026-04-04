@@ -7,10 +7,12 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import vn.com.routex.hub.booking.service.domain.profile.Gender;
 import vn.com.routex.hub.booking.service.domain.user.UserStatus;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.entity.AuditingEntity;
 
@@ -29,11 +31,8 @@ public class UserEntity extends AuditingEntity {
     @Id
     private String id;
 
-    @Column(name = "USER_NAME", nullable = false)
-    private String username;
-
-    @Column(name = "FULL_NAME", nullable = false)
-    private String fullName;
+    @Column(name = "CUSTOMER_MEMBERSHIP_ID")
+    private String customerMembershipId;
 
     @Column(name = "PASSWORD_HASH", nullable = false)
     private String passwordHash;
@@ -44,28 +43,48 @@ public class UserEntity extends AuditingEntity {
     @Column(name = "PHONE_NUMBER", nullable = false)
     private String phoneNumber;
 
+    @Builder.Default
     @Column(name = "PHONE_VERIFIED")
     private Boolean phoneVerified = false;
+
+    @Column(name = "NATIONAL_ID")
+    private String nationalId;
+
+    @Column(name = "ADDRESS")
+    private String address;
+
+    @Column(name = "AVATAR_URL")
+    private String avatarUrl;
+
+    @Column(name = "GENDER")
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
+
+    @Builder.Default
+    @Column(name = "PROFILE_COMPLETED")
+    private Boolean profileCompleted = false;
 
     @Column(name = "EMAIL", nullable = false)
     private String email;
 
+    @Builder.Default
     @Column(name = "EMAIL_VERIFIED")
     private Boolean emailVerified = false;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "STATUS", nullable = false)
     private UserStatus status;
 
     @Column(name = "TENANT_ID")
     private String tenantId;
 
-    @Column(name = "LANGUAGE", nullable = false)
+    @Column(name = "LANGUAGE")
     private String language;
 
-    @Column(name = "TIME_ZONE", nullable = false)
+    @Column(name = "TIME_ZONE")
     private String timezone;
 
+    @Builder.Default
     @Column(name = "FAIL_LOGIN_COUNT")
     private Integer failLoginCount = 0;
 

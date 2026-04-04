@@ -1,4 +1,4 @@
-package vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.stoppoint.entity;
+package vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.operation.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
