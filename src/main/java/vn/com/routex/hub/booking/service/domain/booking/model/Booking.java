@@ -19,7 +19,10 @@ public class Booking {
     private String id;
     private String bookingCode;
     private String routeId;
+    private String merchantId;
+    private String vehicleId;
     private String customerId;
+    private String channel;
     private Integer seatCount;
     private BigDecimal totalAmount;
     private String currency;

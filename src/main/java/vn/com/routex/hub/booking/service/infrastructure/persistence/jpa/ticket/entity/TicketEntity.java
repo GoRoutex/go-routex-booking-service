@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import vn.com.routex.hub.booking.service.domain.ticket.TicketStatus;
-import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.entity.AuditingEntity;
+import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.entity.AbstractAuditingEntity;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -24,7 +24,7 @@ import java.time.OffsetDateTime;
 @SuperBuilder
 @Entity
 @Table(name = "TICKET")
-public class TicketEntity extends AuditingEntity {
+public class TicketEntity extends AbstractAuditingEntity {
 
     @Id
     private String id;

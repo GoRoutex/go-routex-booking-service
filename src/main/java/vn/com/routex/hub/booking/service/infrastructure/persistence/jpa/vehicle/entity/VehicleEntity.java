@@ -13,7 +13,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import vn.com.routex.hub.booking.service.domain.vehicle.VehicleStatus;
 import vn.com.routex.hub.booking.service.domain.vehicle.VehicleType;
-import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.entity.AuditingEntity;
+import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.entity.AbstractAuditingEntity;
 
 @Getter
 @Setter
@@ -22,10 +22,13 @@ import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.entity.A
 @Entity
 @SuperBuilder
 @Table(name = "VEHICLE")
-public class VehicleEntity extends AuditingEntity {
+public class VehicleEntity extends AbstractAuditingEntity {
 
     @Id
     private String id;
+
+    @Column(name = "MERCHANT_ID")
+    private String merchantId;
 
     @Column(name = "CREATOR")
     private String creator;

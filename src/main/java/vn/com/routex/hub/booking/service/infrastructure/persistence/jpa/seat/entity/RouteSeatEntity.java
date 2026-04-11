@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import vn.com.routex.hub.booking.service.domain.seat.SeatStatus;
-import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.entity.AuditingEntity;
+import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.entity.AbstractAuditingEntity;
 
 @Getter
 @Setter
@@ -23,7 +23,7 @@ import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.entity.A
 @SuperBuilder
 @Entity
 @Table(name = "ROUTE_SEAT")
-public class RouteSeatEntity extends AuditingEntity {
+public class RouteSeatEntity extends AbstractAuditingEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

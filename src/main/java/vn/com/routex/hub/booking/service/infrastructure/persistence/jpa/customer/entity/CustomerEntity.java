@@ -6,7 +6,6 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,7 +13,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import vn.com.routex.hub.booking.service.domain.customer.CustomerStatus;
-import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.entity.AuditingEntity;
+import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.entity.AbstractAuditingEntity;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -26,7 +25,7 @@ import java.time.OffsetDateTime;
 @SuperBuilder
 @Entity
 @Table(name = "CUSTOMER")
-public class CustomerEntity extends AuditingEntity {
+public class CustomerEntity extends AbstractAuditingEntity {
 
     @Id
     private String id;

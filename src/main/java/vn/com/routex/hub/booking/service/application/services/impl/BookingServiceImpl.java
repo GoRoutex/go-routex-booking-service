@@ -40,7 +40,7 @@ public class BookingServiceImpl implements BookingService {
     public Booking createBooking(CreateBookingCommand command, List<RouteSeat> routeSeats) {
         sLog.info("[BOOK-SERVICE] Create Draft Booking Command: {}", command);
 
-        VehicleProfile vehicle = vehicleRepositoryPort.findById(command.vehicleId())
+        VehicleProfile vehicle = vehicleRepositoryPort.findById(command.vehicleId(), command.merchantId())
                 .orElseThrow(() -> new BusinessException(
                         command.metadata().requestId(),
                         command.metadata().requestDateTime(),
@@ -55,7 +55,10 @@ public class BookingServiceImpl implements BookingService {
                 .id(UUID.randomUUID().toString())
                 .bookingCode(bookingRepositoryPort.generateBookingCode())
                 .routeId(command.routeId())
+                .merchantId(command.merchantId())
+                .vehicleId(command.vehicleId())
                 .customerId(command.customerId())
+                .channel(command.metadata().channel())
                 .seatCount(routeSeats.size())
                 .totalAmount(totalAmount)
                 .currency(command.currency())

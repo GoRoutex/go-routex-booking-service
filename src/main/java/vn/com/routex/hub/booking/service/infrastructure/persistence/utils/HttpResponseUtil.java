@@ -3,9 +3,9 @@ package vn.com.routex.hub.booking.service.infrastructure.persistence.utils;
 import lombok.experimental.UtilityClass;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import vn.com.routex.hub.booking.service.infrastructure.persistence.exception.BusinessException;
 import vn.com.routex.hub.booking.service.controller.models.base.BaseRequest;
 import vn.com.routex.hub.booking.service.controller.models.base.BaseResponse;
+import vn.com.routex.hub.booking.service.infrastructure.persistence.exception.BusinessException;
 
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.TIMEOUT_ERROR;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.TIMEOUT_ERROR_MESSAGE;

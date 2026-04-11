@@ -8,7 +8,12 @@ import vn.com.routex.hub.booking.service.application.dto.seat.HoldSeatCommand;
 import vn.com.routex.hub.booking.service.application.dto.seat.HoldSeatResult;
 import vn.com.routex.hub.booking.service.application.services.BookingService;
 import vn.com.routex.hub.booking.service.application.services.HoldSeatService;
+import vn.com.routex.hub.booking.service.domain.assignment.RouteAssignmentStatus;
 import vn.com.routex.hub.booking.service.domain.booking.model.Booking;
+import vn.com.routex.hub.booking.service.domain.route.model.RouteAggregate;
+import vn.com.routex.hub.booking.service.domain.route.model.RouteAssignmentRecord;
+import vn.com.routex.hub.booking.service.domain.route.port.RouteAggregateRepositoryPort;
+import vn.com.routex.hub.booking.service.domain.route.port.RouteAssignmentRepositoryPort;
 import vn.com.routex.hub.booking.service.domain.seat.SeatStatus;
 import vn.com.routex.hub.booking.service.domain.seat.model.RouteSeat;
 import vn.com.routex.hub.booking.service.domain.seat.port.RouteSeatRepositoryPort;
@@ -25,14 +30,18 @@ import java.util.UUID;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.INVALID_INPUT_ERROR;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.INVALID_SEAT_NO;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.RECORD_NOT_FOUND;
+import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.ROUTE_NOT_FOUND;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.SEAT_NOT_AVAILABLE;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.SEAT_NOT_FOUND;
+import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.VEHICLE_NOT_ASSIGNED_TO_ROUTE;
 
 @Service
 @RequiredArgsConstructor
 public class HoldSeatServiceImpl implements HoldSeatService {
 
     private final RouteSeatRepositoryPort routeSeatRepositoryPort;
+    private final RouteAggregateRepositoryPort routeAggregateRepositoryPort;
+    private final RouteAssignmentRepositoryPort routeAssignmentRepositoryPort;
     private final BookingService bookingService;
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
@@ -69,6 +78,9 @@ public class HoldSeatServiceImpl implements HoldSeatService {
             );
         }
 
+        RouteAggregate route = validateRoute(command);
+        validateAssignedVehicle(command, route.getMerchantId());
+
         List<RouteSeat> routeSeats = routeSeatRepositoryPort.findAllByRouteIdAndSeatNoInForUpdate(command.routeId(), distinctSeatNos);
         if (routeSeats.size() != distinctSeatNos.size()) {
             throw new BusinessException(
@@ -102,6 +114,7 @@ public class HoldSeatServiceImpl implements HoldSeatService {
 
         Booking booking = bookingService.createBooking(CreateBookingCommand.builder()
                 .metadata(command.metadata())
+                .merchantId(route.getMerchantId())
                 .routeId(command.routeId())
                 .vehicleId(command.vehicleId())
                 .holdBy(command.holdBy())
@@ -134,5 +147,36 @@ public class HoldSeatServiceImpl implements HoldSeatService {
                                 .build())
                         .toList())
                 .build();
+    }
+
+    private RouteAggregate validateRoute(HoldSeatCommand command) {
+        return routeAggregateRepositoryPort.findById(command.routeId())
+                .orElseThrow(() -> new BusinessException(
+                        command.metadata().requestId(),
+                        command.metadata().requestDateTime(),
+                        command.metadata().channel(),
+                        ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(ROUTE_NOT_FOUND, command.routeId()))
+                ));
+    }
+
+    private void validateAssignedVehicle(HoldSeatCommand command, String merchantId) {
+        RouteAssignmentRecord assignment = routeAssignmentRepositoryPort.findActiveByRouteId(command.routeId())
+                .orElseThrow(() -> new BusinessException(
+                        command.metadata().requestId(),
+                        command.metadata().requestDateTime(),
+                        command.metadata().channel(),
+                        ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(VEHICLE_NOT_ASSIGNED_TO_ROUTE, command.routeId()))
+                ));
+
+        if (!RouteAssignmentStatus.ASSIGNED.equals(assignment.getStatus())
+                || !Objects.equals(merchantId, assignment.getMerchantId())
+                || !Objects.equals(command.vehicleId(), assignment.getVehicleId())) {
+            throw new BusinessException(
+                    command.metadata().requestId(),
+                    command.metadata().requestDateTime(),
+                    command.metadata().channel(),
+                    ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, String.format(VEHICLE_NOT_ASSIGNED_TO_ROUTE, command.routeId()))
+            );
+        }
     }
 }

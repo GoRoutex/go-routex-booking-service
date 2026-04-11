@@ -49,7 +49,7 @@
 		<dependency>
 			<groupId>io.github.louisphm091</groupId>
 			<artifactId>auth-security-starter</artifactId>
-			<version>0.0.8</version>
+			<version>0.0.12</version>
 		</dependency>
 
 		<dependency>

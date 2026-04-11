@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import vn.com.routex.hub.booking.service.application.handler.impl.RouteEventHandler;
+import vn.com.routex.hub.booking.service.controller.models.base.BaseRequest;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.config.KafkaEventPublisher;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.event.RouteOpenForBookingEvent;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.event.RouteSellableEvent;
@@ -15,7 +16,6 @@ import vn.com.routex.hub.booking.service.infrastructure.persistence.exception.Bu
 import vn.com.routex.hub.booking.service.infrastructure.persistence.log.SystemLog;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.ExceptionUtils;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.JsonUtils;
-import vn.com.routex.hub.booking.service.controller.models.base.BaseRequest;
 
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.INVALID_DATA_ERROR_MESSAGE;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.INVALID_EVENT_MESSAGE;

@@ -20,6 +20,7 @@ import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.Except
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.DUPLICATE_ERROR;
@@ -56,7 +57,8 @@ public class RouteEventHandler implements RouteEvent {
                         .status(SeatStatus.AVAILABLE)
                         .creator(payload.data().creator())
                         .build())
-                .toList();
+                .collect(Collectors.toList());
+
         List<RouteSeat> savedSeats = routeSeatRepositoryPort.saveAll(seats);
 
         List<RouteCacheSeat> cacheData = savedSeats.stream()

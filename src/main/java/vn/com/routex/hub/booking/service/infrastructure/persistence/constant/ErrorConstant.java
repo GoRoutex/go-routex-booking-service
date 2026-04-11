@@ -44,6 +44,7 @@ public class ErrorConstant {
     public static final String DUPLICATE_VEHICLE = "Vehicle is already exists by %s";
     public static final String ROUTE_SEAT_EXIST = "Route Seat with routeId %s already created";
     public static final String DUPLICATE_ROUTE_ASSIGNMENT = "Route Assignment with routeId %s already exists";
+    public static final String VEHICLE_NOT_ASSIGNED_TO_ROUTE = "Vehicle is not assigned to route %s";
     public static final String RECORD_EXISTS = "Record is already existed";
     public static final String INVALID_START_TIME = "Planned Start Time must be before Planned End Time";
     public static final String INVALID_STOP_ORDER = "stopOrder must be positive & unique";

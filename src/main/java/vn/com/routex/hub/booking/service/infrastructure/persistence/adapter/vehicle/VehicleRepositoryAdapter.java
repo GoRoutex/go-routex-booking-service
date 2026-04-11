@@ -20,4 +20,10 @@ public class VehicleRepositoryAdapter implements VehicleRepositoryPort {
         return vehicleJpaRepository.findById(vehicleId)
                 .map(vehiclePersistenceMapper::toDomain);
     }
+
+    @Override
+    public Optional<VehicleProfile> findById(String vehicleId, String merchantId) {
+        return vehicleJpaRepository.findByIdAndMerchantId(vehicleId, merchantId)
+                .map(vehiclePersistenceMapper::toDomain);
+    }
 }

@@ -1,5 +1,6 @@
 package vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.user.entity;
 
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -14,7 +15,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import vn.com.routex.hub.booking.service.domain.profile.Gender;
 import vn.com.routex.hub.booking.service.domain.user.UserStatus;
-import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.entity.AuditingEntity;
+import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.entity.AbstractAuditingEntity;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -26,7 +27,7 @@ import java.time.OffsetDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class UserEntity extends AuditingEntity {
+public class UserEntity extends AbstractAuditingEntity {
 
     @Id
     private String id;

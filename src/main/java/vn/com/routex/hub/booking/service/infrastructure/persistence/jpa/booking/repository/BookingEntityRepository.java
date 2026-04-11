@@ -4,7 +4,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.booking.entity.BookingEntity;
 
+import java.util.Optional;
+
 public interface BookingEntityRepository extends JpaRepository<BookingEntity, String> {
+
+    Optional<BookingEntity> findByIdAndMerchantId(String id, String merchantId);
 
     @Query(value = """
             SELECT generate_booking_code()

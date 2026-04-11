@@ -8,6 +8,7 @@ import java.time.OffsetDateTime;
 @Builder
 public record CreateBookingCommand(
         RequestMetadata metadata,
+        String merchantId,
         String routeId,
         String vehicleId,
         String holdBy,
