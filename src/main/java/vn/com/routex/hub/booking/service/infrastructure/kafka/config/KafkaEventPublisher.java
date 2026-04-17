@@ -46,4 +46,35 @@ public class KafkaEventPublisher {
             throw new IllegalArgumentException("Kafka publish failed: ", ex);
         }
     }
+
+    public void publish(
+            String requestId,
+            String requestDateTime,
+            String channel,
+            String topicName,
+            String eventName,
+            String aggregateId,
+            Object payload
+    ) {
+        try {
+            KafkaEventMessage<Object> message =
+                    KafkaEventMessage.builder()
+                            .requestId(requestId)
+                            .requestDateTime(requestDateTime)
+                            .channel(channel)
+                            .eventId(UUID.randomUUID().toString())
+                            .eventName(eventName)
+                            .aggregateId(aggregateId)
+                            .source("booking-service")
+                            .version(1)
+                            .occurredAt(OffsetDateTime.now())
+                            .data(payload)
+                            .build();
+
+            String json = JsonUtils.parseToJsonStr(message);
+            kafkaTemplate.send(topicName, aggregateId, json);
+        } catch (Exception ex) {
+            throw new IllegalArgumentException("Kafka publish failed: ", ex);
+        }
+    }
 }

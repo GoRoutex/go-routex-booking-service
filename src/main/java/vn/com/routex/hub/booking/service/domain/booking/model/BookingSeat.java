@@ -21,5 +21,6 @@ public class BookingSeat {
     private String seatNo;
     private BigDecimal price;
     private BookingSeatStatus status;
+    private String ticketId;
     private String creator;
 }

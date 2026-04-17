@@ -22,6 +22,9 @@ public class Booking {
     private String merchantId;
     private String vehicleId;
     private String customerId;
+    private String customerName;
+    private String customerPhone;
+    private String customerEmail;
     private String channel;
     private Integer seatCount;
     private BigDecimal totalAmount;

@@ -20,46 +20,38 @@ import java.time.OffsetDateTime;
 public class Merchant extends AbstractAuditingEntity {
 
     private static final BigDecimal ONE_HUNDRED = new BigDecimal("100");
-
     private String id;
     private String code;
-    private String name;
+    private String slug;
+    private String displayName;
+    private String legalName;
     private String taxCode;
+    private String businessLicenseNumber;
+    private String businessLicenseUrl;
     private String phone;
     private String email;
+    private String logoUrl;
+    private String description;
     private String address;
+    private String ward;
+    private String province;
+    private String country;
+    private String postalCode;
     private String representativeName;
+    private String contactName;
+    private String contactPhone;
+    private String contactEmail;
+    private String ownerFullName;
+    private String ownerPhone;
+    private String ownerEmail;
+    private String bankAccountName;
+    private String bankAccountNumber;
+    private String bankName;
+    private String bankBranch;
     private BigDecimal commissionRate;
     private MerchantStatus status;
-
-    public static Merchant create(
-            String id,
-            String code,
-            String name,
-            String taxCode,
-            String phone,
-            String email,
-            String address,
-            String representativeName,
-            BigDecimal commissionRate,
-            String createdBy
-    ) {
-        OffsetDateTime now = OffsetDateTime.now();
-        return Merchant.builder()
-                .id(id)
-                .code(code)
-                .name(name)
-                .taxCode(taxCode)
-                .phone(phone)
-                .email(email)
-                .address(address)
-                .representativeName(representativeName)
-                .commissionRate(commissionRate)
-                .status(MerchantStatus.ACTIVE)
-                .createdAt(now)
-                .createdBy(createdBy)
-                .build();
-    }
+    private OffsetDateTime approvedAt;
+    private String approvedBy;
 
     public void updateCommissionRate(BigDecimal commissionRate, String actor, OffsetDateTime updatedAt) {
         this.commissionRate = commissionRate;

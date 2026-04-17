@@ -17,6 +17,9 @@ public class BookingPersistenceMapper {
                 .merchantId(entity.getMerchantId())
                 .vehicleId(entity.getVehicleId())
                 .customerId(entity.getCustomerId())
+                .customerName(entity.getCustomerName())
+                .customerPhone(entity.getCustomerPhone())
+                .customerEmail(entity.getCustomerEmail())
                 .channel(entity.getChannel())
                 .seatCount(entity.getSeatCount())
                 .totalAmount(entity.getTotalAmount())
@@ -38,6 +41,9 @@ public class BookingPersistenceMapper {
                 .merchantId(booking.getMerchantId())
                 .vehicleId(booking.getVehicleId())
                 .customerId(booking.getCustomerId())
+                .customerName(booking.getCustomerName())
+                .customerPhone(booking.getCustomerPhone())
+                .customerEmail(booking.getCustomerEmail())
                 .channel(booking.getChannel())
                 .seatCount(booking.getSeatCount())
                 .totalAmount(booking.getTotalAmount())
@@ -59,6 +65,7 @@ public class BookingPersistenceMapper {
                 .seatNo(entity.getSeatNo())
                 .price(entity.getPrice())
                 .status(entity.getStatus())
+                .ticketId(entity.getTicketId())
                 .creator(entity.getCreator())
                 .build();
     }
@@ -71,6 +78,7 @@ public class BookingPersistenceMapper {
                 .seatNo(bookingSeat.getSeatNo())
                 .price(bookingSeat.getPrice())
                 .status(bookingSeat.getStatus())
+                .ticketId(bookingSeat.getTicketId())
                 .creator(bookingSeat.getCreator())
                 .build();
     }

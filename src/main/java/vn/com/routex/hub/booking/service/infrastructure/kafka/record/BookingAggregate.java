@@ -6,10 +6,12 @@ import vn.com.routex.hub.booking.service.domain.booking.model.BookingSeat;
 import vn.com.routex.hub.booking.service.domain.payment.model.Payment;
 import vn.com.routex.hub.booking.service.domain.seat.model.RouteSeat;
 
+import java.util.List;
+
 public record BookingAggregate(
         Payment payment,
         Booking booking,
-        BookingSeat bookingSeat,
-        RouteSeat routeSeat
+        List<BookingSeat> bookingSeats,
+        List<RouteSeat> routeSeats
 ) {
 }

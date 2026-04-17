@@ -14,6 +14,7 @@ public class ErrorConstant {
     public static final String ROLE_NOT_FOUND = "Role not found";
     public static final String AUTHORITIES_NOT_FOUND = "Authorities not found";
     public static final String ROUTE_NOT_FOUND = "Route with Id %s not found";
+    public static final String TICKET_NOT_FOUND = "Ticket with Id %s not found";
     public static final String SEAT_NOT_FOUND = "Seats not found";
     public static final String VEHICLE_NOT_FOUND = "Vehicle not found";
     public static final String ROUTE_SEAT_NOT_FOUND = "Rout Seat with Route Id %s is not exists";
@@ -39,7 +40,7 @@ public class ErrorConstant {
     public static final String ROLE_EXISTS_ERROR = "Role with %s already exists";
     public static final String PERMISSION_EXISTS_ERROR = "Authorities with %s already exists";
     public static final String INVALID_PAGE_SIZE = "pageSize must be in [1..100]";
-    public static final String INVALID_PAGE_NUMBER = "pageNumber must be >= 0";
+    public static final String INVALID_PAGE_NUMBER = "pageNumber must be >= 1";
     public static final String INVALID_SEAT_NO = "seatNos must not be empty";
     public static final String DUPLICATE_VEHICLE = "Vehicle is already exists by %s";
     public static final String ROUTE_SEAT_EXIST = "Route Seat with routeId %s already created";

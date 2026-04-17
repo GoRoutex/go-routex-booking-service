@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>vn.com.routex.hub</groupId>
-	<artifactId>booking-service</artifactId>
+	<artifactId>go-routex-booking-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>go-routex-booking-service</name>
 	<description>Demo project for Spring Boot</description>
@@ -117,6 +117,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc-test</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
 
