@@ -7,7 +7,6 @@ import vn.com.routex.hub.booking.service.domain.booking.port.BookingSeatReposito
 import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.booking.repository.BookingSeatEntityRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -33,8 +32,9 @@ public class BookingSeatRepositoryAdapter implements BookingSeatRepositoryPort {
     }
 
     @Override
-    public Optional<BookingSeat> findByBookingId(String bookingId) {
-        return bookingSeatJpaRepository.findByBookingId(bookingId)
-                .map(bookingPersistenceMapper::toDomain);
+    public List<BookingSeat> findAllByBookingId(String bookingId) {
+        return bookingSeatJpaRepository.findAllByBookingId(bookingId).stream()
+                .map(bookingPersistenceMapper::toDomain)
+                .toList();
     }
 }

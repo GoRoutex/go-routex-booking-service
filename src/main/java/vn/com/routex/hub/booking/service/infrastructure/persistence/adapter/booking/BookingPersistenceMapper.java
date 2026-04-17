@@ -14,7 +14,13 @@ public class BookingPersistenceMapper {
                 .id(entity.getId())
                 .bookingCode(entity.getBookingCode())
                 .routeId(entity.getRouteId())
+                .merchantId(entity.getMerchantId())
+                .vehicleId(entity.getVehicleId())
                 .customerId(entity.getCustomerId())
+                .customerName(entity.getCustomerName())
+                .customerPhone(entity.getCustomerPhone())
+                .customerEmail(entity.getCustomerEmail())
+                .channel(entity.getChannel())
                 .seatCount(entity.getSeatCount())
                 .totalAmount(entity.getTotalAmount())
                 .currency(entity.getCurrency())
@@ -32,7 +38,13 @@ public class BookingPersistenceMapper {
                 .id(booking.getId())
                 .bookingCode(booking.getBookingCode())
                 .routeId(booking.getRouteId())
+                .merchantId(booking.getMerchantId())
+                .vehicleId(booking.getVehicleId())
                 .customerId(booking.getCustomerId())
+                .customerName(booking.getCustomerName())
+                .customerPhone(booking.getCustomerPhone())
+                .customerEmail(booking.getCustomerEmail())
+                .channel(booking.getChannel())
                 .seatCount(booking.getSeatCount())
                 .totalAmount(booking.getTotalAmount())
                 .currency(booking.getCurrency())
@@ -53,6 +65,7 @@ public class BookingPersistenceMapper {
                 .seatNo(entity.getSeatNo())
                 .price(entity.getPrice())
                 .status(entity.getStatus())
+                .ticketId(entity.getTicketId())
                 .creator(entity.getCreator())
                 .build();
     }
@@ -65,6 +78,7 @@ public class BookingPersistenceMapper {
                 .seatNo(bookingSeat.getSeatNo())
                 .price(bookingSeat.getPrice())
                 .status(bookingSeat.getStatus())
+                .ticketId(bookingSeat.getTicketId())
                 .creator(bookingSeat.getCreator())
                 .build();
     }

@@ -6,6 +6,8 @@ import vn.com.routex.hub.booking.service.application.dto.seat.GetAllSeatQuery;
 import vn.com.routex.hub.booking.service.application.dto.seat.GetAllSeatResult;
 import vn.com.routex.hub.booking.service.application.dto.seat.SeatItemResult;
 import vn.com.routex.hub.booking.service.application.services.GetAllSeatService;
+import vn.com.routex.hub.booking.service.domain.route.model.RouteAggregate;
+import vn.com.routex.hub.booking.service.domain.route.port.RouteAggregateRepositoryPort;
 import vn.com.routex.hub.booking.service.domain.seat.model.RouteSeat;
 import vn.com.routex.hub.booking.service.domain.seat.port.RouteSeatRepositoryPort;
 import vn.com.routex.hub.booking.service.infrastructure.cache.redis.models.RouteCacheSeat;
@@ -17,6 +19,7 @@ import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.Except
 import java.util.List;
 
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.RECORD_NOT_FOUND;
+import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.ROUTE_NOT_FOUND;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.ROUTE_SEAT_NOT_FOUND;
 
 @Service
@@ -24,6 +27,7 @@ import static vn.com.routex.hub.booking.service.infrastructure.persistence.const
 public class GetAllSeatServiceImpl implements GetAllSeatService {
 
     private final RouteSeatRepositoryPort routeSeatRepositoryPort;
+    private final RouteAggregateRepositoryPort routeAggregateRepositoryPort;
     private final RouteSeatCacheService routeSeatCacheService;
 
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
@@ -31,6 +35,7 @@ public class GetAllSeatServiceImpl implements GetAllSeatService {
     @Override
     public GetAllSeatResult getAllSeat(GetAllSeatQuery query) {
         sLog.info("[BOOK-SERVICE] Get All Seat Query: {}", query);
+        ensureRouteExists(query);
         List<RouteCacheSeat> cacheSeats = routeSeatCacheService.getSeats(query.routeId());
         if (cacheSeats != null && !cacheSeats.isEmpty()) {
             return GetAllSeatResult.builder()
@@ -71,5 +76,15 @@ public class GetAllSeatServiceImpl implements GetAllSeatService {
                                 .build())
                         .toList())
                 .build();
+    }
+
+    private RouteAggregate ensureRouteExists(GetAllSeatQuery query) {
+        return routeAggregateRepositoryPort.findById(query.routeId())
+                .orElseThrow(() -> new BusinessException(
+                        query.metadata().requestId(),
+                        query.metadata().requestDateTime(),
+                        query.metadata().channel(),
+                        ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(ROUTE_NOT_FOUND, query.routeId()))
+                ));
     }
 }

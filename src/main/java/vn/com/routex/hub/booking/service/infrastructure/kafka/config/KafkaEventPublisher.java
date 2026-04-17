@@ -3,9 +3,9 @@ package vn.com.routex.hub.booking.service.infrastructure.kafka.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
+import vn.com.routex.hub.booking.service.controller.models.base.BaseRequest;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.model.KafkaEventMessage;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.JsonUtils;
-import vn.com.routex.hub.booking.service.controller.models.base.BaseRequest;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -43,6 +43,37 @@ public class KafkaEventPublisher {
 
             kafkaTemplate.send(topicName, aggregateId, json);
         } catch(Exception ex) {
+            throw new IllegalArgumentException("Kafka publish failed: ", ex);
+        }
+    }
+
+    public void publish(
+            String requestId,
+            String requestDateTime,
+            String channel,
+            String topicName,
+            String eventName,
+            String aggregateId,
+            Object payload
+    ) {
+        try {
+            KafkaEventMessage<Object> message =
+                    KafkaEventMessage.builder()
+                            .requestId(requestId)
+                            .requestDateTime(requestDateTime)
+                            .channel(channel)
+                            .eventId(UUID.randomUUID().toString())
+                            .eventName(eventName)
+                            .aggregateId(aggregateId)
+                            .source("booking-service")
+                            .version(1)
+                            .occurredAt(OffsetDateTime.now())
+                            .data(payload)
+                            .build();
+
+            String json = JsonUtils.parseToJsonStr(message);
+            kafkaTemplate.send(topicName, aggregateId, json);
+        } catch (Exception ex) {
             throw new IllegalArgumentException("Kafka publish failed: ", ex);
         }
     }

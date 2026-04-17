@@ -1,5 +1,6 @@
 package vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.route.entity;
 
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -12,7 +13,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import vn.com.routex.hub.booking.service.domain.route.RouteStatus;
-import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.entity.AuditingEntity;
+import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.entity.AbstractAuditingEntity;
 
 import java.time.OffsetDateTime;
 
@@ -20,19 +21,22 @@ import java.time.OffsetDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@SuperBuilder
 @Entity
+@SuperBuilder
 @Table(name = "ROUTE")
-public class RouteEntity extends AuditingEntity {
+
+public class RouteEntity extends AbstractAuditingEntity {
 
     @Id
     private String id;
-
     @Column(name = "ROUTE_CODE")
     private String routeCode;
 
     @Column(name = "CREATOR")
     private String creator;
+
+    @Column(name = "MERCHANT_ID")
+    private String merchantId;
 
     @Column(name = "PICKUP_BRANCH")
     private String pickupBranch;
@@ -55,7 +59,7 @@ public class RouteEntity extends AuditingEntity {
     @Column(name = "ACTUAL_END_TIME")
     private OffsetDateTime actualEndTime;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "STATUS")
+    @Enumerated(EnumType.STRING)
     private RouteStatus status;
 }

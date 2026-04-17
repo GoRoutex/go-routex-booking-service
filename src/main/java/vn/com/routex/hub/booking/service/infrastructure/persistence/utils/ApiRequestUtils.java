@@ -2,8 +2,8 @@ package vn.com.routex.hub.booking.service.infrastructure.persistence.utils;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.experimental.UtilityClass;
-import vn.com.routex.hub.booking.service.infrastructure.persistence.config.RequestAttributes;
 import vn.com.routex.hub.booking.service.controller.models.base.BaseRequest;
+import vn.com.routex.hub.booking.service.infrastructure.persistence.config.RequestAttributes;
 
 @UtilityClass
 public class ApiRequestUtils {

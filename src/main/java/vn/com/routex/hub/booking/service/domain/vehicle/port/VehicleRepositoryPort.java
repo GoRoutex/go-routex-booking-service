@@ -6,4 +6,6 @@ import java.util.Optional;
 
 public interface VehicleRepositoryPort {
     Optional<VehicleProfile> findById(String vehicleId);
+
+    Optional<VehicleProfile> findById(String vehicleId, String merchantId);
 }

@@ -1,5 +1,6 @@
 package vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.assignment.entity;
 
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -12,7 +13,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import vn.com.routex.hub.booking.service.domain.assignment.RouteAssignmentStatus;
-import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.entity.AuditingEntity;
+import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.entity.AbstractAuditingEntity;
 
 import java.time.OffsetDateTime;
 
@@ -20,11 +21,11 @@ import java.time.OffsetDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@SuperBuilder
 @Entity
+@SuperBuilder
 @Table(name = "ROUTE_ASSIGNMENT")
-public class RouteAssignmentEntity extends AuditingEntity {
 
+public class RouteAssignmentEntity extends AbstractAuditingEntity {
     @Id
     private String id;
 
@@ -33,6 +34,12 @@ public class RouteAssignmentEntity extends AuditingEntity {
 
     @Column(name = "CREATOR")
     private String creator;
+
+    @Column(name = "MERCHANT_ID")
+    private String merchantId;
+
+    @Column(name = "DRIVER_ID")
+    private String driverId;
 
     @Column(name = "VEHICLE_ID")
     private String vehicleId;
@@ -43,7 +50,8 @@ public class RouteAssignmentEntity extends AuditingEntity {
     @Column(name = "UNASSIGNED_AT")
     private OffsetDateTime unAssignedAt;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "STATUS")
+    @Enumerated(EnumType.STRING)
     private RouteAssignmentStatus status;
+
 }

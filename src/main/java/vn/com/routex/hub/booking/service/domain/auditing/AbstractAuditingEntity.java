@@ -1,14 +1,24 @@
 package vn.com.routex.hub.booking.service.domain.auditing;
 
 
+import jakarta.persistence.Column;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.MappedSuperclass;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
+@EntityListeners(AuditingEntityListener.class)
+@MappedSuperclass
 @Getter
 @Setter
 @SuperBuilder(toBuilder = true)
@@ -16,11 +26,20 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public abstract class AbstractAuditingEntity {
 
-    private LocalDateTime createdAt;
 
+    @CreatedDate
+    @Column(name = "created_at")
+    private OffsetDateTime createdAt;
+
+    @CreatedBy
+    @Column(name = "created_by")
     private String createdBy;
 
+    @LastModifiedBy
+    @Column(name = "updated_by")
     private String updatedBy;
 
-    private LocalDateTime updatedAt;
+    @LastModifiedDate
+    @Column(name = "updated_at")
+    private OffsetDateTime updatedAt;
 }

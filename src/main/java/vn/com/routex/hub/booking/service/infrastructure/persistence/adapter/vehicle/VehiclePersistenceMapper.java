@@ -10,6 +10,7 @@ public class VehiclePersistenceMapper {
     public VehicleProfile toDomain(VehicleEntity entity) {
         return VehicleProfile.builder()
                 .id(entity.getId())
+                .merchantId(entity.getMerchantId())
                 .creator(entity.getCreator())
                 .status(entity.getStatus())
                 .type(entity.getType())

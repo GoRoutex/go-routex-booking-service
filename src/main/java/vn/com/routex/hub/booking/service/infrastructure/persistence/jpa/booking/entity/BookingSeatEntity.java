@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import vn.com.routex.hub.booking.service.domain.booking.BookingSeatStatus;
-import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.entity.AuditingEntity;
+import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.entity.AbstractAuditingEntity;
 
 import java.math.BigDecimal;
 
@@ -23,7 +23,7 @@ import java.math.BigDecimal;
 @SuperBuilder
 @Entity
 @Table(name = "BOOKING_SEAT")
-public class BookingSeatEntity extends AuditingEntity {
+public class BookingSeatEntity extends AbstractAuditingEntity {
 
     @Id
     private String id;
@@ -44,6 +44,10 @@ public class BookingSeatEntity extends AuditingEntity {
     @Enumerated(EnumType.STRING)
     private BookingSeatStatus status;
 
+    @Column(name = "TICKET_ID")
+    private String ticketId;
+
     @Column(name = "CREATOR")
     private String creator;
+
 }

@@ -12,23 +12,28 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class BookingRepositoryAdapter implements BookingRepositoryPort {
 
-    private final BookingEntityRepository bookingJpaRepository;
+    private final BookingEntityRepository bookingEntityRepository;
     private final BookingPersistenceMapper bookingPersistenceMapper;
 
     @Override
     public Booking save(Booking booking) {
         return bookingPersistenceMapper.toDomain(
-                bookingJpaRepository.save(bookingPersistenceMapper.toJpaEntity(booking))
+                bookingEntityRepository.save(bookingPersistenceMapper.toJpaEntity(booking))
         );
     }
 
     @Override
     public Optional<Booking> findById(String bookingId) {
-        return bookingJpaRepository.findById(bookingId).map(bookingPersistenceMapper::toDomain);
+        return bookingEntityRepository.findById(bookingId).map(bookingPersistenceMapper::toDomain);
+    }
+
+    @Override
+    public Optional<Booking> findById(String bookingId, String merchantId) {
+        return bookingEntityRepository.findByIdAndMerchantId(bookingId, merchantId).map(bookingPersistenceMapper::toDomain);
     }
 
     @Override
     public String generateBookingCode() {
-        return bookingJpaRepository.generateBookingCode();
+        return bookingEntityRepository.generateBookingCode();
     }
 }
