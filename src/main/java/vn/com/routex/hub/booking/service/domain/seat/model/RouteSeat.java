@@ -5,9 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import vn.com.routex.hub.booking.service.domain.auditing.AbstractAuditingEntity;
 import vn.com.routex.hub.booking.service.domain.seat.SeatStatus;
-
-import java.time.OffsetDateTime;
 
 /**
  * Domain model for route seat.
@@ -19,15 +18,11 @@ import java.time.OffsetDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder(toBuilder = true)
-public class RouteSeat {
-
-    private Integer id;
+public class RouteSeat extends AbstractAuditingEntity {
+    private String id;
     private String routeId;
     private String seatNo;
     private SeatStatus status;
-    private String ticketId;
-    private OffsetDateTime holdUntil;
-    private String holdBy;
     private String creator;
 }
 

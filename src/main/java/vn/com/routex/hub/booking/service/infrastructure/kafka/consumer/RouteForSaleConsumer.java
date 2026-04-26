@@ -5,13 +5,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 import vn.com.routex.hub.booking.service.application.handler.impl.RouteEventHandler;
 import vn.com.routex.hub.booking.service.controller.models.base.BaseRequest;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.config.KafkaEventPublisher;
+import vn.com.routex.hub.booking.service.infrastructure.kafka.event.DomainEvent;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.event.RouteOpenForBookingEvent;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.event.RouteSellableEvent;
-import vn.com.routex.hub.booking.service.infrastructure.kafka.model.KafkaEventMessage;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.exception.BusinessException;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.log.SystemLog;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.ExceptionUtils;
@@ -35,72 +36,102 @@ public class RouteForSaleConsumer {
     @Value("${spring.kafka.events.notification-activities}")
     private String notificationActivitiesEvent;
 
-
     private final KafkaEventPublisher kafkaEventPublisher;
     private final RouteEventHandler routeEventHandler;
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
     @KafkaListener(
             topics = "${spring.kafka.topics.routes}",
+            containerFactory = "kafkaListenerContainerFactory",
             groupId = "${spring.kafka.group-id.bookings}")
-    public void consume(String payload) {
+    public void consume(String payload, Acknowledgment acknowledgment) {
+        sLog.info("[ROUTE-FOR-SALE] Raw Payload: {}",  payload);
 
-        KafkaEventMessage<RouteSellableEvent> event =
+        DomainEvent event =
                 JsonUtils.parseToKafkaObject(
                         payload,
                         new TypeReference<>() {
                         });
 
-        if (event == null || event.data() == null) {
+
+        sLog.info("[ROUTE-FOR-SALE] Domain Event: {}", event);
+
+
+        if (event == null
+                || event.header() == null
+                || event.payload() == null
+                || event.header().get("context") == null
+                || event.payload().get("data") == null) {
             throw new BusinessException(ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_DATA_ERROR_MESSAGE));
         }
 
-        if (!routeReadyForSale.equals(event.eventName())) {
-            sLog.info("Ignore event {}", event.eventName());
+        if (!routeReadyForSale.equals(event.eventType())) {
+            sLog.info("Ignore event {}", event.eventType());
+            acknowledgment.acknowledge();
             return;
         }
 
+        BaseRequest context = JsonUtils.convertValue(event.header().get("context"), BaseRequest.class);
+        RouteSellableEvent routeEvent = JsonUtils.convertValue(event.payload().get("data"), RouteSellableEvent.class);
+
         sLog.info("[ROUTE-EVENT] Processing event: eventName={} eventId={} aggregateId={} routeId={} vehicleId={}",
-                event.eventName(),
+                event.eventType(),
                 event.eventId(),
                 event.aggregateId(),
-                event.data().routeId(),
-                event.data().vehicleId());
+                routeEvent.routeId(),
+                routeEvent.vehicleId());
 
-        validateEvent(event);
+        sLog.info("[ROUTE-EVENT] Route Sellable Event: {}", routeEvent);
 
-        routeEventHandler.generateRouteSeat(event);
+        try {
+            validateEvent(event, context, routeEvent);
+            routeEventHandler.generateRouteSeat(event, context, routeEvent);
+        } catch (Exception ex) {
+            sLog.error("[ROUTE-EVENT] Failed eventName={} eventId={} aggregateId={} routeId={} vehicleId={}",
+                    event.eventType(),
+                    event.eventId(),
+                    event.aggregateId(),
+                    routeEvent.routeId(),
+                    routeEvent.vehicleId(),
+                    ex);
+            throw ex;
+        }
 
-        sLog.info("[ROUTE-EVENT] Event processed successfully: eventName={} eventId={} routeId={}", event.eventName(), event.eventId(), event.aggregateId());
+        sLog.info("[ROUTE-EVENT] Event processed successfully: eventName={} eventId={} routeId={}", event.eventType(), event.eventId(), event.aggregateId());
 
         RouteOpenForBookingEvent bookingEvent = RouteOpenForBookingEvent
                 .builder()
-                .routeId(event.data().routeId())
-                .vehicleId(event.data().vehicleId())
-                .seatCount(event.data().seatCount())
-                .creator(event.data().creator())
-                .assignedAt(event.data().assignedAt())
+                .routeId(routeEvent.routeId())
+                .vehicleId(routeEvent.vehicleId())
+                .seatCount(routeEvent.seatCount())
+                .creator(routeEvent.creator())
+                .assignedAt(routeEvent.assignedAt())
                 .build();
 
         kafkaEventPublisher.publish(
-                new BaseRequest(event.requestId(), event.requestDateTime(), event.channel()),
+                context,
                 notificationTopic,
                 notificationActivitiesEvent,
-                event.data().routeId(),
+                routeEvent.routeId(),
                 bookingEvent
         );
+
+        acknowledgment.acknowledge();
     }
 
-    private void validateEvent(KafkaEventMessage<RouteSellableEvent> event) {
-        RouteSellableEvent data = event.data();
 
+    public void validateEvent(DomainEvent event, BaseRequest context, RouteSellableEvent data) {
         if (event.eventId().isBlank()
-                || event.eventName().isBlank()
+                || event.eventType().isBlank()
                 || event.aggregateId().isBlank()
+                || context == null
+                || context.getRequestId().isBlank()
+                || context.getRequestDateTime().isBlank()
+                || context.getChannel().isBlank()
                 || data.routeId().isBlank()
                 || data.vehicleId().isBlank()) {
-            throw new BusinessException(event.requestId(), event.requestDateTime(), event.channel(),
-                    ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, String.format(INVALID_EVENT_MESSAGE, event.eventName())));
+            throw new BusinessException(ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, String.format(INVALID_EVENT_MESSAGE, event.eventType())));
         }
     }
+
 }

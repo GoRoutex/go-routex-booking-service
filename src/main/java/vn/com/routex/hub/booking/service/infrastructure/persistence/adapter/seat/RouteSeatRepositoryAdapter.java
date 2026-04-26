@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import vn.com.routex.hub.booking.service.domain.seat.model.RouteSeat;
 import vn.com.routex.hub.booking.service.domain.seat.port.RouteSeatRepositoryPort;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.seat.repository.RouteSeatEntityRepository;
+import vn.com.routex.hub.booking.service.infrastructure.persistence.log.SystemLog;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,38 +14,40 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class RouteSeatRepositoryAdapter implements RouteSeatRepositoryPort {
 
-    private final RouteSeatEntityRepository RouteSeatEntityRepository;
+    private final RouteSeatEntityRepository routeSeatEntityRepository;
     private final RouteSeatPersistenceMapper routeSeatPersistenceMapper;
+    private final SystemLog sLog = SystemLog.getLogger(this.getClass());
+
 
     @Override
     public boolean existsByRouteId(String routeId) {
-        return RouteSeatEntityRepository.existsByRouteId(routeId);
+        return routeSeatEntityRepository.existsByRouteId(routeId);
     }
 
     @Override
     public List<RouteSeat> findAllByRouteIdOrderBySeatNoAsc(String routeId) {
-        return RouteSeatEntityRepository.findAllByRouteIdOrderBySeatNoAsc(routeId).stream()
+        return routeSeatEntityRepository.findAllByRouteIdOrderBySeatNoAsc(routeId).stream()
                 .map(routeSeatPersistenceMapper::toDomain)
                 .toList();
     }
 
     @Override
     public List<RouteSeat> findAllByRouteIdAndSeatNoInForUpdate(String routeId, List<String> seatNos) {
-        return RouteSeatEntityRepository.findAllByRouteIdAndSeatNoInForUpdate(routeId, seatNos).stream()
+        return routeSeatEntityRepository.findAllByRouteIdAndSeatNoInForUpdate(routeId, seatNos).stream()
                 .map(routeSeatPersistenceMapper::toDomain)
                 .toList();
     }
 
     @Override
     public Optional<RouteSeat> findByRouteIdAndSeatNo(String routeId, String seatNo) {
-        return RouteSeatEntityRepository.findByRouteIdAndSeatNo(routeId, seatNo)
+        return routeSeatEntityRepository.findByRouteIdAndSeatNo(routeId, seatNo)
                 .map(routeSeatPersistenceMapper::toDomain);
     }
 
     @Override
     public List<RouteSeat> saveAll(List<RouteSeat> routeSeats) {
-        return RouteSeatEntityRepository.saveAll(routeSeats.stream()
-                        .map(routeSeatPersistenceMapper::toJpaEntity)
+        return routeSeatEntityRepository.saveAll(routeSeats.stream()
+                        .map(routeSeatPersistenceMapper::toEntity)
                         .toList()).stream()
                 .map(routeSeatPersistenceMapper::toDomain)
                 .toList();
@@ -53,7 +56,7 @@ public class RouteSeatRepositoryAdapter implements RouteSeatRepositoryPort {
     @Override
     public RouteSeat save(RouteSeat routeSeat) {
         return routeSeatPersistenceMapper.toDomain(
-                RouteSeatEntityRepository.save(routeSeatPersistenceMapper.toJpaEntity(routeSeat))
+                routeSeatEntityRepository.save(routeSeatPersistenceMapper.toEntity(routeSeat))
         );
     }
 }

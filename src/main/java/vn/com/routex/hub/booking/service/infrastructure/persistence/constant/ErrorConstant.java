@@ -17,6 +17,7 @@ public class ErrorConstant {
     public static final String TICKET_NOT_FOUND = "Ticket with Id %s not found";
     public static final String SEAT_NOT_FOUND = "Seats not found";
     public static final String VEHICLE_NOT_FOUND = "Vehicle not found";
+    public static final String VEHICLE_TEMPLATE_NOT_FOUND = "Vehicle template not found";
     public static final String ROUTE_SEAT_NOT_FOUND = "Rout Seat with Route Id %s is not exists";
     public static final String RECORD_NOT_FOUND_MESSAGE = "Record not found";
     public static final String SUCCESS_CODE = "0000";

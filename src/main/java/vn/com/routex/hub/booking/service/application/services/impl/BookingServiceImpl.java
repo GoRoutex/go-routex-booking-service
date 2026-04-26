@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import vn.com.routex.hub.booking.service.application.dto.booking.CreateBookingCommand;
 import vn.com.routex.hub.booking.service.application.services.BookingService;
-import vn.com.routex.hub.booking.service.application.services.FareConfigService;
 import vn.com.routex.hub.booking.service.domain.booking.BookingSeatStatus;
 import vn.com.routex.hub.booking.service.domain.booking.BookingStatus;
 import vn.com.routex.hub.booking.service.domain.booking.model.Booking;
@@ -13,7 +12,9 @@ import vn.com.routex.hub.booking.service.domain.booking.port.BookingRepositoryPo
 import vn.com.routex.hub.booking.service.domain.booking.port.BookingSeatRepositoryPort;
 import vn.com.routex.hub.booking.service.domain.seat.model.RouteSeat;
 import vn.com.routex.hub.booking.service.domain.vehicle.model.VehicleProfile;
+import vn.com.routex.hub.booking.service.domain.vehicle.model.VehicleTemplate;
 import vn.com.routex.hub.booking.service.domain.vehicle.port.VehicleRepositoryPort;
+import vn.com.routex.hub.booking.service.domain.vehicle.port.VehicleTemplateRepositoryPort;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.exception.BusinessException;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.log.SystemLog;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.ExceptionUtils;
@@ -29,11 +30,10 @@ import static vn.com.routex.hub.booking.service.infrastructure.persistence.const
 @Service
 @RequiredArgsConstructor
 public class BookingServiceImpl implements BookingService {
-
-    private final FareConfigService fareConfigService;
     private final VehicleRepositoryPort vehicleRepositoryPort;
     private final BookingRepositoryPort bookingRepositoryPort;
     private final BookingSeatRepositoryPort bookingSeatRepositoryPort;
+    private final VehicleTemplateRepositoryPort vehicleTemplateRepositoryPort;
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
     @Override
@@ -48,7 +48,15 @@ public class BookingServiceImpl implements BookingService {
                         ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, VEHICLE_NOT_FOUND)
                 ));
 
-        BigDecimal basePrice = fareConfigService.getUnitPrice(vehicle.getType());
+        VehicleTemplate template = vehicleTemplateRepositoryPort.findById(vehicle.getTemplateId())
+                .orElseThrow(() -> new BusinessException(
+                        command.metadata().requestId(),
+                        command.metadata().requestDateTime(),
+                        command.metadata().channel(),
+                        ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, VEHICLE_NOT_FOUND)
+                ));
+
+        BigDecimal basePrice = template.getTicketPrice();
         BigDecimal totalAmount = basePrice.multiply(BigDecimal.valueOf(routeSeats.size()));
 
         Booking booking = Booking.builder()

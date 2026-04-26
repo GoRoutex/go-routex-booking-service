@@ -32,9 +32,6 @@ public class UserEntity extends AbstractAuditingEntity {
     @Id
     private String id;
 
-    @Column(name = "CUSTOMER_MEMBERSHIP_ID")
-    private String customerMembershipId;
-
     @Column(name = "PASSWORD_HASH", nullable = false)
     private String passwordHash;
 
@@ -75,9 +72,6 @@ public class UserEntity extends AbstractAuditingEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "STATUS", nullable = false)
     private UserStatus status;
-
-    @Column(name = "TENANT_ID")
-    private String tenantId;
 
     @Column(name = "LANGUAGE")
     private String language;

@@ -11,7 +11,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.entity.AuditingEntity;
+import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.entity.AbstractAuditingEntity;
 
 import java.math.BigDecimal;
 
@@ -22,7 +22,7 @@ import java.math.BigDecimal;
 @SuperBuilder
 @Entity
 @Table(name = "FARE_CONFIG")
-public class FareConfigEntity extends AuditingEntity {
+public class FareConfigEntity extends AbstractAuditingEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
