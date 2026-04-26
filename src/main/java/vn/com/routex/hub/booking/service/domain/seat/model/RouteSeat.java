@@ -24,5 +24,6 @@ public class RouteSeat extends AbstractAuditingEntity {
     private String seatNo;
     private SeatStatus status;
     private String creator;
+    private String seatTemplateId;
 }
 

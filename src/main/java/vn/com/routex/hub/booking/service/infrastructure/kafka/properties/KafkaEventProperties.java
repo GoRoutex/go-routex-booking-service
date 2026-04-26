@@ -22,6 +22,7 @@ public class KafkaEventProperties {
     @Getter
     @Setter
     public static class Retry {
+        private long maxInterval = 30000L;
         private int maxAttempts = 3;
         private long backOffMs = 1000;
         private double backOffMultiplier = 2.0;

@@ -11,6 +11,7 @@ import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.util.backoff.ExponentialBackOff;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.properties.KafkaEventProperties;
+import vn.com.routex.hub.booking.service.infrastructure.persistence.exception.BusinessException;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.log.SystemLog;
 
 @Configuration
@@ -27,9 +28,18 @@ public class KafkaErrorHandlerConfig {
         backOff.setInitialInterval(kafkaEventProperties.getRetry().getBackOffMs());
         backOff.setMultiplier(kafkaEventProperties.getRetry().getBackOffMultiplier());
         backOff.setMaxAttempts(kafkaEventProperties.getRetry().getMaxAttempts());
-
+        backOff.setMaxInterval(kafkaEventProperties.getRetry().getMaxInterval());
 
         DefaultErrorHandler errorHandler = getDefaultErrorHandler(backOff);
+
+
+        errorHandler.addNotRetryableExceptions(
+                BusinessException.class,
+                IllegalArgumentException.class
+        );
+
+        errorHandler.setCommitRecovered(true);
+
         errorHandler.setRetryListeners((record, ex, deliveryAttempt) ->
                 sLog.error("[KAFKA-RETRY] attempt={} topic={} partition={} offset={} key={} exception={}",
                         deliveryAttempt,
@@ -58,7 +68,6 @@ public class KafkaErrorHandlerConfig {
                 }
         );
 
-        DefaultErrorHandler errorHandler = new DefaultErrorHandler(recoverer, backOff);
-        return errorHandler;
+        return new DefaultErrorHandler(recoverer, backOff);
     }
 }

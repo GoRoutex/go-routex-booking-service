@@ -6,9 +6,12 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import vn.com.routex.hub.booking.service.application.handler.RouteEvent;
 import vn.com.routex.hub.booking.service.controller.models.base.BaseRequest;
+import vn.com.routex.hub.booking.service.domain.seat.SeatFloor;
 import vn.com.routex.hub.booking.service.domain.seat.SeatStatus;
 import vn.com.routex.hub.booking.service.domain.seat.model.RouteSeat;
+import vn.com.routex.hub.booking.service.domain.seat.model.SeatTemplate;
 import vn.com.routex.hub.booking.service.domain.seat.port.RouteSeatRepositoryPort;
+import vn.com.routex.hub.booking.service.domain.seat.port.SeatTemplateRepositoryPort;
 import vn.com.routex.hub.booking.service.domain.vehicle.model.VehicleProfile;
 import vn.com.routex.hub.booking.service.domain.vehicle.model.VehicleTemplate;
 import vn.com.routex.hub.booking.service.domain.vehicle.port.VehicleRepositoryPort;
@@ -22,16 +25,15 @@ import vn.com.routex.hub.booking.service.infrastructure.persistence.log.SystemLo
 import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.ExceptionUtils;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.DUPLICATE_ERROR;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.INVALID_DATA_ERROR;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.RECORD_NOT_FOUND;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.ROUTE_SEAT_EXIST;
+import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.SEAT_TEMPLATE_NOT_FOUND;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.VEHICLE_NOT_FOUND;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.VEHICLE_TEMPLATE_NOT_FOUND;
 
@@ -43,6 +45,7 @@ public class RouteEventHandler implements RouteEvent {
     private final RouteSeatRepositoryPort routeSeatRepositoryPort;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final VehicleTemplateRepositoryPort vehicleTemplateRepositoryPort;
+    private final SeatTemplateRepositoryPort seatTemplateRepositoryPort;
 
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
@@ -65,11 +68,12 @@ public class RouteEventHandler implements RouteEvent {
                 payload.routeId(), payload.vehicleId(), template.getSeatCapacity(), template.isHasFloor());
 
         List<RouteSeat> seats = generateSeatNos(vehicle, template).stream()
-                .map(seatNo -> RouteSeat.builder()
+                .map(seatTemplate -> RouteSeat.builder()
                         .id(UUID.randomUUID().toString())
                         .routeId(payload.routeId())
-                        .seatNo(seatNo)
+                        .seatNo(seatTemplate.getSeatCode())
                         .status(SeatStatus.AVAILABLE)
+                        .seatTemplateId(seatTemplate.getId())
                         .creator(payload.creator())
                         .createdAt(OffsetDateTime.now())
                         .createdBy(payload.creator())
@@ -90,7 +94,8 @@ public class RouteEventHandler implements RouteEvent {
         applicationEventPublisher.publishEvent(new RouteSeatGeneratedEvent(payload.routeId(), cacheData));
     }
 
-    private List<String> generateSeatNos(VehicleProfile vehicle, VehicleTemplate template) {
+    private List<SeatTemplate> generateSeatNos(VehicleProfile vehicle, VehicleTemplate template) {
+
         int seatCapacity = Math.toIntExact(template.getSeatCapacity());
         boolean hasFloor = template.isHasFloor();
 
@@ -101,20 +106,19 @@ public class RouteEventHandler implements RouteEvent {
             ));
         }
 
-        if (!hasFloor) {
-            return IntStream.rangeClosed(1, seatCapacity)
-                    .mapToObj(i -> String.format("%02d", i))
-                    .toList();
+        List<SeatTemplate> seatTemplateList;
+
+        if(!hasFloor) {
+            seatTemplateList = seatTemplateRepositoryPort.findByVehicleTemplateIdAndFloor(template.getId(), SeatFloor.NONE);
+        } else {
+            seatTemplateList = seatTemplateRepositoryPort.findByVehicleTemplateId(template.getId());
         }
 
-        int half = (seatCapacity + 1) / 2;
-        List<String> seatNos = new ArrayList<>(seatCapacity);
-        for (int i = 1; i <= Math.min(half, seatCapacity); i++) {
-            seatNos.add("A" + String.format("%02d", i));
+        if(seatTemplateList.isEmpty()) {
+            throw new BusinessException(ExceptionUtils.buildResultResponse(
+                    RECORD_NOT_FOUND, String.format(SEAT_TEMPLATE_NOT_FOUND, template.getId())));
         }
-        for (int i = half + 1; i <= seatCapacity; i++) {
-            seatNos.add("B" + String.format("%02d", i));
-        }
-        return seatNos;
+
+        return seatTemplateList;
     }
 }

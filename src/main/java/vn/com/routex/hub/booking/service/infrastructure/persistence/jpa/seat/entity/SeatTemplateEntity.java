@@ -1,5 +1,6 @@
 package vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.seat.entity;
 
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -11,7 +12,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import vn.com.routex.hub.booking.service.domain.seat.SeatStatus;
+import vn.com.routex.hub.booking.service.domain.seat.SeatFloor;
+import vn.com.routex.hub.booking.service.domain.seat.SeatType;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.entity.AbstractAuditingEntity;
 
 @Getter
@@ -20,25 +22,33 @@ import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.entity.A
 @NoArgsConstructor
 @SuperBuilder
 @Entity
-@Table(name = "ROUTE_SEAT")
-public class RouteSeatEntity extends AbstractAuditingEntity {
+@Table(name = "SEAT_TEMPLATE")
+public class SeatTemplateEntity extends AbstractAuditingEntity {
 
     @Id
     private String id;
 
-    @Column(name = "ROUTE_ID")
-    private String routeId;
+    @Column(name = "VEHICLE_TEMPLATE_ID", nullable = false)
+    private String vehicleTemplateId;
 
-    @Column(name = "SEAT_NO")
-    private String seatNo;
+    @Column(name = "SEAT_CODE")
+    private String seatCode;
 
-    @Column(name = "SEAT_TEMPLATE_ID")
-    private String seatTemplateId;
-
-    @Column(name = "STATUS")
+    @Column(name = "FLOOR")
     @Enumerated(EnumType.STRING)
-    private SeatStatus status;
+    private SeatFloor floor;
 
-    @Column(name = "CREATOR")
-    private String creator;
+    @Column(name = "ROW_NO")
+    private int rowNo;
+
+    @Column(name = "COLUMN_NO")
+    private int columnNo;
+
+    @Column(name = "TYPE")
+    @Enumerated(EnumType.STRING)
+    private SeatType type;
+
+    @Column(name = "IS_ACTIVE")
+    private boolean isActive;
+
 }
