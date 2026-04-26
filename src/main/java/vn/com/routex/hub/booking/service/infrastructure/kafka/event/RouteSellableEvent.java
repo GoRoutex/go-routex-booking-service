@@ -11,7 +11,7 @@ public record RouteSellableEvent(
         String assignedBy,
         OffsetDateTime assignedAt,
         String routeStatus,
-        Integer seatCount,
+        Long seatCount,
         String creator,
         Boolean hasFloor
 ) {

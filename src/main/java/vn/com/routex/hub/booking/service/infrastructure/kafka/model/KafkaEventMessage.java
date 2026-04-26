@@ -5,16 +5,54 @@ import lombok.Builder;
 import java.time.OffsetDateTime;
 
 @Builder
-public record KafkaEventMessage<T> (
-        String requestId,
-        String requestDateTime,
-        String channel,
+public record KafkaEventMessage<T>(
         String eventId,
-        String eventName,
+        String eventType,
         String aggregateId,
-        String source,
-        Integer version,
+        String eventKey,
         OffsetDateTime occurredAt,
-        T data
+        MessageHeader header,
+        MessagePayload<T> payload,
+        String source,
+        Integer version
 ) {
+    public String eventName() {
+        return eventType;
+    }
+
+    public String requestId() {
+        return header != null && header.context() != null ? header.context().requestId() : null;
+    }
+
+    public String requestDateTime() {
+        return header != null && header.context() != null ? header.context().requestDateTime() : null;
+    }
+
+    public String channel() {
+        return header != null && header.context() != null ? header.context().channel() : null;
+    }
+
+    public T data() {
+        return payload != null ? payload.data() : null;
+    }
+
+    @Builder
+    public record MessageHeader(
+            MessageContext context
+    ) {
+    }
+
+    @Builder
+    public record MessageContext(
+            String requestId,
+            String requestDateTime,
+            String channel
+    ) {
+    }
+
+    @Builder
+    public record MessagePayload<T>(
+            T data
+    ) {
+    }
 }

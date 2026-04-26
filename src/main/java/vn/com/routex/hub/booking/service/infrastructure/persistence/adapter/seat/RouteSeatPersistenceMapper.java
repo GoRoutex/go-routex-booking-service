@@ -14,16 +14,24 @@ public class RouteSeatPersistenceMapper {
                 .seatNo(entity.getSeatNo())
                 .status(entity.getStatus())
                 .creator(entity.getCreator())
+                .createdBy(entity.getCreator())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
+                .updatedBy(entity.getUpdatedBy())
                 .build();
     }
 
-    public RouteSeatEntity toJpaEntity(RouteSeat routeSeat) {
+    public RouteSeatEntity toEntity(RouteSeat routeSeat) {
         return RouteSeatEntity.builder()
                 .id(routeSeat.getId())
                 .routeId(routeSeat.getRouteId())
                 .seatNo(routeSeat.getSeatNo())
                 .status(routeSeat.getStatus())
                 .creator(routeSeat.getCreator())
+                .createdBy(routeSeat.getCreator())
+                .createdAt(routeSeat.getCreatedAt())
+                .updatedAt(routeSeat.getUpdatedAt())
+                .updatedBy(routeSeat.getUpdatedBy())
                 .build();
     }
 }

@@ -8,7 +8,7 @@ import java.time.OffsetDateTime;
 public record RouteOpenForBookingEvent(
         String routeId,
         String vehicleId,
-        Integer seatCount,
+        Long seatCount,
         String creator,
         OffsetDateTime assignedAt
 ) {

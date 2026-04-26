@@ -27,16 +27,23 @@ public class KafkaEventPublisher {
 
             KafkaEventMessage<Object> message =
                     KafkaEventMessage.builder()
-                            .requestId(request.getRequestId())
-                            .requestDateTime(request.getRequestDateTime())
-                            .channel(request.getChannel())
                             .eventId(UUID.randomUUID().toString())
-                            .eventName(eventName)
+                            .eventType(eventName)
                             .aggregateId(aggregateId)
+                            .eventKey(eventName)
+                            .header(KafkaEventMessage.MessageHeader.builder()
+                                    .context(KafkaEventMessage.MessageContext.builder()
+                                            .requestId(request.getRequestId())
+                                            .requestDateTime(request.getRequestDateTime())
+                                            .channel(request.getChannel())
+                                            .build())
+                                    .build())
+                            .payload(KafkaEventMessage.MessagePayload.builder()
+                                    .data(payload)
+                                    .build())
                             .source("booking-service")
                             .version(1)
                             .occurredAt(OffsetDateTime.now())
-                            .data(payload)
                             .build();
 
             String json = JsonUtils.parseToJsonStr(message);
@@ -59,16 +66,23 @@ public class KafkaEventPublisher {
         try {
             KafkaEventMessage<Object> message =
                     KafkaEventMessage.builder()
-                            .requestId(requestId)
-                            .requestDateTime(requestDateTime)
-                            .channel(channel)
                             .eventId(UUID.randomUUID().toString())
-                            .eventName(eventName)
+                            .eventType(eventName)
                             .aggregateId(aggregateId)
+                            .eventKey(eventName)
+                            .header(KafkaEventMessage.MessageHeader.builder()
+                                    .context(KafkaEventMessage.MessageContext.builder()
+                                            .requestId(requestId)
+                                            .requestDateTime(requestDateTime)
+                                            .channel(channel)
+                                            .build())
+                                    .build())
+                            .payload(KafkaEventMessage.MessagePayload.builder()
+                                    .data(payload)
+                                    .build())
                             .source("booking-service")
                             .version(1)
                             .occurredAt(OffsetDateTime.now())
-                            .data(payload)
                             .build();
 
             String json = JsonUtils.parseToJsonStr(message);

@@ -1,6 +1,5 @@
 package vn.com.routex.hub.booking.service.infrastructure.persistence.utils;
 
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,6 +29,14 @@ public class JsonUtils {
     public Object parseToObject(String message, Class<Object> clazz) throws JsonProcessingException {
         try {
             return objectMapper.readValue(message, clazz);
+        } catch (Exception e) {
+            throw new BusinessException(ExceptionUtils.buildResultResponse(TIMEOUT_ERROR, TIMEOUT_ERROR_MESSAGE));
+        }
+    }
+
+    public <T> T convertValue(Object source, Class<T> clazz) {
+        try {
+            return objectMapper.convertValue(source, clazz);
         } catch (Exception e) {
             throw new BusinessException(ExceptionUtils.buildResultResponse(TIMEOUT_ERROR, TIMEOUT_ERROR_MESSAGE));
         }

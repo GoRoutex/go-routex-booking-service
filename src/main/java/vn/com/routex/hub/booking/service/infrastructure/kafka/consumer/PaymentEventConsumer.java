@@ -4,11 +4,13 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 import vn.com.routex.hub.booking.service.application.handler.impl.PaymentEventHandler;
+import vn.com.routex.hub.booking.service.controller.models.base.BaseRequest;
+import vn.com.routex.hub.booking.service.infrastructure.kafka.event.DomainEvent;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.event.PaymentFailedEvent;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.event.PaymentSuccessEvent;
-import vn.com.routex.hub.booking.service.infrastructure.kafka.model.KafkaEventMessage;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.exception.BusinessException;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.log.SystemLog;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.ExceptionUtils;
@@ -38,73 +40,99 @@ public class PaymentEventConsumer {
             containerFactory = "kafkaListenerContainerFactory",
             groupId = "${spring.kafka.group-id.payments}"
     )
-    public void paymentCompletedConsumer(String payload) {
-        KafkaEventMessage<PaymentSuccessEvent>  event =
+    public void paymentCompletedConsumer(String payload, Acknowledgment acknowledgment) {
+        DomainEvent event =
                 JsonUtils.parseToKafkaObject(
                         payload,
                         new TypeReference<>() {
                         });
 
-        if (event == null || event.data() == null) {
+        if (event == null
+                || event.header() == null
+                || event.payload() == null
+                || event.header().get("context") == null
+                || event.payload().get("data") == null) {
             throw new BusinessException(ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_DATA_ERROR_MESSAGE));
         }
 
-        if (!paymentCompletedEvent.equals(event.eventName())) {
-            sLog.info("Ignore event {}", event.eventName());
+        if (!paymentCompletedEvent.equals(event.eventType())) {
+            sLog.info("Ignore event {}", event.eventType());
+            acknowledgment.acknowledge();
             return;
         }
 
+        BaseRequest context = JsonUtils.convertValue(event.header().get("context"), BaseRequest.class);
+        PaymentSuccessEvent paymentEvent = JsonUtils.convertValue(event.payload().get("data"), PaymentSuccessEvent.class);
+
         sLog.info("[PAYMENT-EVENT] Processing event: eventName={} eventId={} aggregateId={} paymentId={} customerId={}",
-                event.eventName(),
+                event.eventType(),
                 event.eventId(),
                 event.aggregateId(),
-                event.data().paymentId(),
-                event.data().customerId());
+                paymentEvent.paymentId(),
+                paymentEvent.customerId());
 
-        PaymentSuccessEvent data = event.data();
+        PaymentSuccessEvent data = paymentEvent;
 
         if (event.eventId().isBlank()
-                || event.eventName().isBlank()
+                || event.eventType().isBlank()
                 || event.aggregateId().isBlank()
+                || context == null
+                || context.getRequestId().isBlank()
+                || context.getRequestDateTime().isBlank()
+                || context.getChannel().isBlank()
                 || data.paymentId().isBlank()
                 || data.customerId().isBlank()
                 || data.status() == null) {
-            throw new BusinessException(event.requestId(), event.requestDateTime(), event.channel(),
-                    ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, String.format(INVALID_EVENT_MESSAGE, event.eventName())));
+            throw new BusinessException(context.getRequestId(), context.getRequestDateTime(), context.getChannel(),
+                    ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, String.format(INVALID_EVENT_MESSAGE, event.eventType())));
         }
 
-        paymentEventHandler.updateSuccessPayment(event);
-        sLog.info("[PAYMENT-EVENT] Event processed successfully: eventName={} eventId={} paymentId={}", event.eventName(), event.eventId(), event.aggregateId());
+        paymentEventHandler.updateSuccessPayment(event, context, paymentEvent);
+        sLog.info("[PAYMENT-EVENT] Event processed successfully: eventName={} eventId={} paymentId={}", event.eventType(), event.eventId(), event.aggregateId());
+        acknowledgment.acknowledge();
 
         // Publish event for notification
         // Publish event for analytics
     }
 
-    @KafkaListener(topics = "${spring.kafka.topics.payment-failed}", groupId = "${spring.kafka.group-id.payments}")
-    public void paymentFailedConsumer(String payload) {
-        KafkaEventMessage<PaymentFailedEvent>  event =
+    @KafkaListener(
+            topics = "${spring.kafka.topics.payment-failed}",
+            containerFactory = "kafkaListenerContainerFactory",
+            groupId = "${spring.kafka.group-id.payments}"
+    )
+    public void paymentFailedConsumer(String payload, Acknowledgment acknowledgment) {
+        DomainEvent event =
                 JsonUtils.parseToKafkaObject(
                         payload,
                         new TypeReference<>() {
                         });
 
-        if (event == null || event.data() == null) {
+        if (event == null
+                || event.header() == null
+                || event.payload() == null
+                || event.header().get("context") == null
+                || event.payload().get("data") == null) {
             throw new BusinessException(ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_DATA_ERROR_MESSAGE));
         }
 
-        if (!paymentFailedEvent.equals(event.eventName())) {
-            sLog.info("Ignore event {}", event.eventName());
+        if (!paymentFailedEvent.equals(event.eventType())) {
+            sLog.info("Ignore event {}", event.eventType());
+            acknowledgment.acknowledge();
             return;
         }
 
+        BaseRequest context = JsonUtils.convertValue(event.header().get("context"), BaseRequest.class);
+        PaymentFailedEvent paymentEvent = JsonUtils.convertValue(event.payload().get("data"), PaymentFailedEvent.class);
+
         sLog.info("[PAYMENT-EVENT] Processing event: eventName={} eventId={} aggregateId={} paymentId={}",
-                event.eventName(),
+                event.eventType(),
                 event.eventId(),
                 event.aggregateId(),
-                event.data().paymentId());
+                paymentEvent.paymentId());
 
-        paymentEventHandler.updateFailEvent(event);
-        sLog.info("[BOOKING-EVENT] Event processed successfully: eventName={} eventId={} paymentId={}", event.eventName(), event.eventId(), event.aggregateId());
+        paymentEventHandler.updateFailEvent(event, context, paymentEvent);
+        sLog.info("[BOOKING-EVENT] Event processed successfully: eventName={} eventId={} paymentId={}", event.eventType(), event.eventId(), event.aggregateId());
+        acknowledgment.acknowledge();
         // Publish event for notification
         // Publish event for analytics
     }

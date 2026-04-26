@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import vn.com.routex.hub.booking.service.application.handler.PaymentEvent;
+import vn.com.routex.hub.booking.service.controller.models.base.BaseRequest;
 import vn.com.routex.hub.booking.service.domain.booking.BookingSeatStatus;
 import vn.com.routex.hub.booking.service.domain.booking.BookingStatus;
 import vn.com.routex.hub.booking.service.domain.booking.model.Booking;
@@ -20,10 +21,10 @@ import vn.com.routex.hub.booking.service.domain.ticket.TicketStatus;
 import vn.com.routex.hub.booking.service.domain.ticket.model.Ticket;
 import vn.com.routex.hub.booking.service.domain.ticket.port.TicketRepositoryPort;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.config.KafkaEventPublisher;
+import vn.com.routex.hub.booking.service.infrastructure.kafka.event.DomainEvent;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.event.PaymentFailedEvent;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.event.PaymentSuccessEvent;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.event.TicketIssuedEvent;
-import vn.com.routex.hub.booking.service.infrastructure.kafka.model.KafkaEventMessage;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.record.BookingAggregate;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.exception.BusinessException;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.log.SystemLog;
@@ -46,7 +47,7 @@ public class PaymentEventHandler implements PaymentEvent {
     private final TicketRepositoryPort ticketRepositoryPort;
     private final KafkaEventPublisher kafkaEventPublisher;
 
-    @Value("${spring.kafka.topics.bookings}")
+    @Value("${spring.kafka.topics.booking}")
     private String bookingTopic;
 
     @Value("${spring.kafka.events.ticket-issued}")
@@ -61,13 +62,13 @@ public class PaymentEventHandler implements PaymentEvent {
      */
     @Override
     @Transactional
-    public void updateSuccessPayment(KafkaEventMessage<PaymentSuccessEvent> event) {
+    public void updateSuccessPayment(DomainEvent event, BaseRequest context, PaymentSuccessEvent payload) {
         BookingAggregate aggregate = loadAggregate(
-                event.data().paymentId(),
-                event.data().bookingId(),
-                event.requestId(),
-                event.requestDateTime(),
-                event.channel()
+                payload.paymentId(),
+                payload.bookingId(),
+                context.getRequestId(),
+                context.getRequestDateTime(),
+                context.getChannel()
         );
 
         if (aggregate.booking().getStatus() == BookingStatus.CONFIRMED) {
@@ -80,18 +81,18 @@ public class PaymentEventHandler implements PaymentEvent {
         List<BookingSeat> reservedSeats = attachIssuedTickets(aggregate.bookingSeats(), issuedTickets);
         aggregate.booking().setStatus(BookingStatus.CONFIRMED);
         saveAggregate(aggregate, reservedSeats, issuedTickets);
-        publishTicketIssuedEvent(event, aggregate, issuedTickets);
+        publishTicketIssuedEvent(context, aggregate, issuedTickets);
     }
 
     @Override
     @Transactional
-    public void updateFailEvent(KafkaEventMessage<PaymentFailedEvent> event) {
+    public void updateFailEvent(DomainEvent event, BaseRequest context, PaymentFailedEvent payload) {
         BookingAggregate aggregate = loadAggregate(
-                event.data().paymentId(),
-                event.data().bookingId(),
-                event.requestId(),
-                event.requestDateTime(),
-                event.channel()
+                payload.paymentId(),
+                payload.bookingId(),
+                context.getRequestId(),
+                context.getRequestDateTime(),
+                context.getChannel()
         );
 
         if (aggregate.booking().getStatus() == BookingStatus.CANCELLED) {
@@ -217,7 +218,7 @@ public class PaymentEventHandler implements PaymentEvent {
         paymentRepositoryPort.save(aggregate.payment());
     }
 
-    private void publishTicketIssuedEvent(KafkaEventMessage<PaymentSuccessEvent> event,
+    private void publishTicketIssuedEvent(BaseRequest context,
                                           BookingAggregate aggregate,
                                           List<Ticket> issuedTickets) {
         TicketIssuedEvent payload = TicketIssuedEvent.builder()
@@ -245,9 +246,9 @@ public class PaymentEventHandler implements PaymentEvent {
                 .build();
 
         kafkaEventPublisher.publish(
-                event.requestId(),
-                event.requestDateTime(),
-                event.channel(),
+                context.getRequestId(),
+                context.getRequestDateTime(),
+                context.getChannel(),
                 bookingTopic,
                 ticketIssuedEvent,
                 aggregate.booking().getId(),

@@ -5,8 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import vn.com.routex.hub.booking.service.domain.auditing.AbstractAuditingEntity;
 import vn.com.routex.hub.booking.service.domain.vehicle.VehicleStatus;
-import vn.com.routex.hub.booking.service.domain.vehicle.VehicleType;
 
 import java.time.OffsetDateTime;
 
@@ -15,38 +15,29 @@ import java.time.OffsetDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder(toBuilder = true)
-public class VehicleProfile {
+public class VehicleProfile extends AbstractAuditingEntity {
     private String id;
     private String merchantId;
+    private String templateId;
     private String creator;
     private VehicleStatus status;
-    private VehicleType type;
     private String vehiclePlate;
-    private Integer seatCapacity;
-    private boolean hasFloor;
-    private String manufacturer;
-    private OffsetDateTime createdAt;
-    private String createdBy;
 
     public static VehicleProfile register(
             String id,
             String merchantId,
+            String templateId,
             String creator,
-            VehicleType type,
             String vehiclePlate,
-            Integer seatCapacity,
-            String manufacturer,
             OffsetDateTime createdAt
     ) {
         return VehicleProfile.builder()
                 .id(id)
                 .merchantId(merchantId)
+                .templateId(templateId)
                 .creator(creator)
                 .status(VehicleStatus.AVAILABLE)
-                .type(type)
                 .vehiclePlate(vehiclePlate)
-                .seatCapacity(seatCapacity)
-                .manufacturer(manufacturer)
                 .createdAt(createdAt)
                 .createdBy(creator)
                 .build();

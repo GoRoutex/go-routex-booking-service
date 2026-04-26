@@ -5,13 +5,16 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 import vn.com.routex.hub.booking.service.controller.models.seat.RouteSeatView;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.seat.entity.RouteSeatEntity;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface RouteSeatEntityRepository extends JpaRepository<RouteSeatEntity, Integer> {
+
+@Repository
+public interface RouteSeatEntityRepository extends JpaRepository<RouteSeatEntity, String> {
 
     boolean existsByRouteId(String routeId);
 

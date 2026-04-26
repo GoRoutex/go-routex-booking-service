@@ -48,8 +48,8 @@ spring:
       notification-activities: "routex.notification.activities"
 
     topics:
-      routes: "route.event.management"
-      bookings: "booking.event.management"
+      routes: "route.management.event"
+      booking: "route.bookings.event"
       payment-success: "payment.success.event.management"
       payment-failed: "payment.failed.event.management"
       seats: "seat.event.management"
@@ -59,6 +59,7 @@ spring:
     group-id:
       bookings: "booking-service"
       payments: "payment-service"
+      routes: "routes-service"
 
     listener:
       ack-mode: manual
