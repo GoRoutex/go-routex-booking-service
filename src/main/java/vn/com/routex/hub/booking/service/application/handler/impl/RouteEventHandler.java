@@ -4,8 +4,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
+import vn.com.go.routex.identity.security.log.SystemLog;
 import vn.com.routex.hub.booking.service.application.handler.RouteEvent;
-import vn.com.routex.hub.booking.service.controller.models.base.BaseRequest;
+import vn.com.routex.hub.booking.service.interfaces.models.base.BaseRequest;
 import vn.com.routex.hub.booking.service.domain.seat.SeatFloor;
 import vn.com.routex.hub.booking.service.domain.seat.SeatStatus;
 import vn.com.routex.hub.booking.service.domain.seat.model.RouteSeat;
@@ -21,7 +22,6 @@ import vn.com.routex.hub.booking.service.infrastructure.kafka.event.DomainEvent;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.event.RouteSeatGeneratedEvent;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.event.RouteSellableEvent;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.exception.BusinessException;
-import vn.com.routex.hub.booking.service.infrastructure.persistence.log.SystemLog;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.ExceptionUtils;
 
 import java.time.OffsetDateTime;
@@ -82,6 +82,7 @@ public class RouteEventHandler implements RouteEvent {
 
         List<RouteSeat> savedSeats = routeSeatRepositoryPort.saveAll(seats);
 
+        sLog.info("saved seats: {}", savedSeats);
         List<RouteCacheSeat> cacheData = savedSeats.stream()
                 .map(seat -> RouteCacheSeat.builder()
                         .routeId(seat.getRouteId())
@@ -118,6 +119,8 @@ public class RouteEventHandler implements RouteEvent {
             throw new BusinessException(ExceptionUtils.buildResultResponse(
                     RECORD_NOT_FOUND, String.format(SEAT_TEMPLATE_NOT_FOUND, template.getId())));
         }
+
+        sLog.info("Seat Template List: {}", seatTemplateList);
 
         return seatTemplateList;
     }

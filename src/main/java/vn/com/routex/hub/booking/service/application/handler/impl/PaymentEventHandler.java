@@ -4,8 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import vn.com.go.routex.identity.security.log.SystemLog;
 import vn.com.routex.hub.booking.service.application.handler.PaymentEvent;
-import vn.com.routex.hub.booking.service.controller.models.base.BaseRequest;
+import vn.com.routex.hub.booking.service.interfaces.models.base.BaseRequest;
 import vn.com.routex.hub.booking.service.domain.booking.BookingSeatStatus;
 import vn.com.routex.hub.booking.service.domain.booking.BookingStatus;
 import vn.com.routex.hub.booking.service.domain.booking.model.Booking;
@@ -27,7 +28,6 @@ import vn.com.routex.hub.booking.service.infrastructure.kafka.event.PaymentSucce
 import vn.com.routex.hub.booking.service.infrastructure.kafka.event.TicketIssuedEvent;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.record.BookingAggregate;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.exception.BusinessException;
-import vn.com.routex.hub.booking.service.infrastructure.persistence.log.SystemLog;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.ExceptionUtils;
 
 import java.time.OffsetDateTime;
@@ -75,6 +75,12 @@ public class PaymentEventHandler implements PaymentEvent {
             sLog.info("[BOOKING-SERVICE] Payment success event already processed for bookingId={}", aggregate.booking().getId());
             return;
         }
+        if (aggregate.booking().getStatus() == BookingStatus.CANCELLED
+                || aggregate.booking().getStatus() == BookingStatus.EXPIRED) {
+            sLog.info("[BOOKING-SERVICE] Ignore payment success for bookingId={} because current status={}",
+                    aggregate.booking().getId(), aggregate.booking().getStatus());
+            return;
+        }
 
         aggregate.routeSeats().forEach(routeSeat -> routeSeat.setStatus(SeatStatus.SOLD));
         List<Ticket> issuedTickets = createTickets(aggregate);
@@ -95,8 +101,10 @@ public class PaymentEventHandler implements PaymentEvent {
                 context.getChannel()
         );
 
-        if (aggregate.booking().getStatus() == BookingStatus.CANCELLED) {
-            sLog.info("[BOOKING-SERVICE] Payment failed event already processed for bookingId={}", aggregate.booking().getId());
+        if (aggregate.booking().getStatus() == BookingStatus.CANCELLED
+                || aggregate.booking().getStatus() == BookingStatus.EXPIRED) {
+            sLog.info("[BOOKING-SERVICE] Payment failed event ignored for bookingId={} because current status={}",
+                    aggregate.booking().getId(), aggregate.booking().getStatus());
             return;
         }
 
@@ -122,7 +130,7 @@ public class PaymentEventHandler implements PaymentEvent {
                         ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, "Payment not found")
                 ));
 
-        Booking booking = bookingRepositoryPort.findById(bookingId)
+        Booking booking = bookingRepositoryPort.findByIdForUpdate(bookingId)
                 .orElseThrow(() -> new BusinessException(
                         requestId, requestDateTime, channel,
                         ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, "Booking not found")

@@ -1,7 +1,7 @@
 package vn.com.routex.hub.booking.service.infrastructure.persistence.exception;
 
 import lombok.EqualsAndHashCode;
-import vn.com.routex.hub.booking.service.controller.models.result.ApiResult;
+import vn.com.routex.hub.booking.service.interfaces.models.result.ApiResult;
 
 @EqualsAndHashCode(callSuper = true)
 public class BusinessException extends BaseException {

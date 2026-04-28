@@ -1,5 +1,6 @@
 package vn.com.routex.hub.booking.service.infrastructure.persistence.utils;
 
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,11 +11,20 @@ import vn.com.routex.hub.booking.service.infrastructure.persistence.exception.Bu
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.TIMEOUT_ERROR;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.TIMEOUT_ERROR_MESSAGE;
 
+
 @UtilityClass
 
 public class JsonUtils {
 
     private final ObjectMapper objectMapper = ApplicationConfig.getObjectMapper();
+
+    public <T> T convertValue(Object source, Class<T> clazz) {
+        try {
+            return objectMapper.convertValue(source, clazz);
+        } catch (Exception e) {
+            throw new BusinessException(ExceptionUtils.buildResultResponse(TIMEOUT_ERROR, TIMEOUT_ERROR_MESSAGE));
+        }
+    }
 
 
     public String parseToJsonStr(Object message) throws JsonProcessingException {
@@ -34,14 +44,6 @@ public class JsonUtils {
         }
     }
 
-    public <T> T convertValue(Object source, Class<T> clazz) {
-        try {
-            return objectMapper.convertValue(source, clazz);
-        } catch (Exception e) {
-            throw new BusinessException(ExceptionUtils.buildResultResponse(TIMEOUT_ERROR, TIMEOUT_ERROR_MESSAGE));
-        }
-    }
-
     public <T> T parseToKafkaObject(String message, TypeReference<T> type) {
         try {
             return objectMapper.readValue(message, type);
@@ -49,4 +51,5 @@ public class JsonUtils {
             throw new BusinessException(ExceptionUtils.buildResultResponse(TIMEOUT_ERROR, TIMEOUT_ERROR_MESSAGE));
         }
     }
+
 }

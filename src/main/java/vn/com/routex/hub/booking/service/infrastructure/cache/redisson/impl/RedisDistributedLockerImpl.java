@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
+import vn.com.go.routex.identity.security.log.SystemLog;
 import vn.com.routex.hub.booking.service.infrastructure.cache.redisson.RedisDistributedLocker;
 import vn.com.routex.hub.booking.service.infrastructure.cache.redisson.RedisDistributedService;
-import vn.com.routex.hub.booking.service.infrastructure.persistence.log.SystemLog;
 
 import java.util.concurrent.TimeUnit;
 

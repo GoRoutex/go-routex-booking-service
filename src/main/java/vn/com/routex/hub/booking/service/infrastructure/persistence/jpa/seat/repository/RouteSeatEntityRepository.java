@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import vn.com.routex.hub.booking.service.controller.models.seat.RouteSeatView;
+import vn.com.routex.hub.booking.service.interfaces.models.seat.RouteSeatView;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.seat.entity.RouteSeatEntity;
 
 import java.util.List;

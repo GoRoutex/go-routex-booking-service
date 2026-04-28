@@ -11,6 +11,7 @@ import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.assignme
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -22,6 +23,12 @@ public class RouteAssignmentRepositoryAdapter implements RouteAssignmentReposito
     @Override
     public boolean existsActiveByRouteId(String routeId) {
         return findActiveByRouteId(routeId).isPresent();
+    }
+
+    @Override
+    public Optional<RouteAssignmentRecord> findByRouteId(String routeId) {
+        return routeAssignmentEntityRepository.findByRouteId(routeId)
+                .map(routeAssignmentPersistenceMapper::toDomain);
     }
 
     @Override

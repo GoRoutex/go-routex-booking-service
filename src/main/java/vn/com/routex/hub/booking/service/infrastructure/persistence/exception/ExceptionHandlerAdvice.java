@@ -15,9 +15,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
-import vn.com.routex.hub.booking.service.controller.models.base.BaseRequest;
-import vn.com.routex.hub.booking.service.controller.models.base.BaseResponse;
-import vn.com.routex.hub.booking.service.controller.models.result.ApiResult;
+import vn.com.routex.hub.booking.service.interfaces.models.base.BaseRequest;
+import vn.com.routex.hub.booking.service.interfaces.models.base.BaseResponse;
+import vn.com.routex.hub.booking.service.interfaces.models.result.ApiResult;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.ApiRequestUtils;
 
 import java.util.ArrayList;

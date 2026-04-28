@@ -10,6 +10,7 @@ public class ErrorConstant {
     public static final String AUTHORITIES_ERROR = "You are not authorized for this action";
     public static final String TIMEOUT_ERROR_MESSAGE = "Timeout";
     public static final String RECORD_NOT_FOUND = "1407";
+    public static final String ASSIGNMENT_NOT_FOUND = "Assignment with routeId %s not found";
     public static final String FLARE_CONFIG_NOT_FOUND = "Flare Config not found";
     public static final String SEAT_TEMPLATE_NOT_FOUND = "Seat template not found with template Id: %s";
     public static final String ROLE_NOT_FOUND = "Role not found";

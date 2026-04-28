@@ -3,22 +3,20 @@ package vn.com.routex.hub.booking.service.application.services.impl;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import vn.com.routex.hub.booking.service.application.dto.booking.CreateBookingCommand;
-import vn.com.routex.hub.booking.service.application.dto.seat.HoldSeatCommand;
-import vn.com.routex.hub.booking.service.application.dto.seat.HoldSeatResult;
+import vn.com.go.routex.identity.security.log.SystemLog;
+import vn.com.routex.hub.booking.service.application.command.booking.CreateBookingCommand;
+import vn.com.routex.hub.booking.service.application.command.seat.HoldSeatCommand;
+import vn.com.routex.hub.booking.service.application.command.seat.HoldSeatResult;
 import vn.com.routex.hub.booking.service.application.services.BookingService;
 import vn.com.routex.hub.booking.service.application.services.HoldSeatService;
-import vn.com.routex.hub.booking.service.domain.assignment.RouteAssignmentStatus;
 import vn.com.routex.hub.booking.service.domain.booking.model.Booking;
 import vn.com.routex.hub.booking.service.domain.route.model.RouteAggregate;
-import vn.com.routex.hub.booking.service.domain.route.model.RouteAssignmentRecord;
 import vn.com.routex.hub.booking.service.domain.route.port.RouteAggregateRepositoryPort;
 import vn.com.routex.hub.booking.service.domain.route.port.RouteAssignmentRepositoryPort;
 import vn.com.routex.hub.booking.service.domain.seat.SeatStatus;
 import vn.com.routex.hub.booking.service.domain.seat.model.RouteSeat;
 import vn.com.routex.hub.booking.service.domain.seat.port.RouteSeatRepositoryPort;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.exception.BusinessException;
-import vn.com.routex.hub.booking.service.infrastructure.persistence.log.SystemLog;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.ExceptionUtils;
 
 import java.time.OffsetDateTime;
@@ -33,7 +31,6 @@ import static vn.com.routex.hub.booking.service.infrastructure.persistence.const
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.ROUTE_NOT_FOUND;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.SEAT_NOT_AVAILABLE;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.SEAT_NOT_FOUND;
-import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.VEHICLE_NOT_ASSIGNED_TO_ROUTE;
 
 @Service
 @RequiredArgsConstructor
@@ -53,9 +50,9 @@ public class HoldSeatServiceImpl implements HoldSeatService {
 
         if (command.seatNos() == null || command.seatNos().isEmpty()) {
             throw new BusinessException(
-                    command.metadata().requestId(),
-                    command.metadata().requestDateTime(),
-                    command.metadata().channel(),
+                    command.context().requestId(),
+                    command.context().requestDateTime(),
+                    command.context().channel(),
                     ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_SEAT_NO)
             );
         }
@@ -71,22 +68,22 @@ public class HoldSeatServiceImpl implements HoldSeatService {
 
         if (distinctSeatNos.isEmpty()) {
             throw new BusinessException(
-                    command.metadata().requestId(),
-                    command.metadata().requestDateTime(),
-                    command.metadata().channel(),
+                    command.context().requestId(),
+                    command.context().requestDateTime(),
+                    command.context().channel(),
                     ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_SEAT_NO)
             );
         }
 
         RouteAggregate route = validateRoute(command);
-        validateAssignedVehicle(command, route.getMerchantId());
 
+        sLog.info("SeatNos: {} DistinctSeatNos: {}", command.routeId(), distinctSeatNos);
         List<RouteSeat> routeSeats = routeSeatRepositoryPort.findAllByRouteIdAndSeatNoInForUpdate(command.routeId(), distinctSeatNos);
         if (routeSeats.size() != distinctSeatNos.size()) {
             throw new BusinessException(
-                    command.metadata().requestId(),
-                    command.metadata().requestDateTime(),
-                    command.metadata().channel(),
+                    command.context().requestId(),
+                    command.context().requestDateTime(),
+                    command.context().channel(),
                     ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, SEAT_NOT_FOUND)
             );
         }
@@ -95,15 +92,11 @@ public class HoldSeatServiceImpl implements HoldSeatService {
         OffsetDateTime holdUntil = now.plusMinutes(5);
 
         for (RouteSeat seat : routeSeats) {
-            if (SeatStatus.HELD.equals(seat.getStatus())) {
-                seat.setStatus(SeatStatus.AVAILABLE);
-            }
-
             if (!SeatStatus.AVAILABLE.equals(seat.getStatus())) {
                 throw new BusinessException(
-                        command.metadata().requestId(),
-                        command.metadata().requestDateTime(),
-                        command.metadata().channel(),
+                        command.context().requestId(),
+                        command.context().requestDateTime(),
+                        command.context().channel(),
                         ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, String.format(SEAT_NOT_AVAILABLE, seat.getSeatNo()))
                 );
             }
@@ -113,19 +106,16 @@ public class HoldSeatServiceImpl implements HoldSeatService {
         routeSeatRepositoryPort.saveAll(routeSeats);
 
         Booking booking = bookingService.createBooking(CreateBookingCommand.builder()
-                .metadata(command.metadata())
+                .context(command.context())
                 .merchantId(route.getMerchantId())
                 .routeId(command.routeId())
-                .vehicleId(command.vehicleId())
                 .holdBy(command.holdBy())
                 .holdToken(holdToken)
                 .heldAt(now)
                 .holdUntil(holdUntil)
-                .customerId(command.customerId())
                 .customerName(command.customerName())
                 .customerPhone(command.customerPhone())
                 .customerEmail(command.customerEmail())
-                .currency(command.currency())
                 .build(), routeSeats);
 
         return HoldSeatResult.builder()
@@ -152,31 +142,10 @@ public class HoldSeatServiceImpl implements HoldSeatService {
     private RouteAggregate validateRoute(HoldSeatCommand command) {
         return routeAggregateRepositoryPort.findById(command.routeId())
                 .orElseThrow(() -> new BusinessException(
-                        command.metadata().requestId(),
-                        command.metadata().requestDateTime(),
-                        command.metadata().channel(),
+                        command.context().requestId(),
+                        command.context().requestDateTime(),
+                        command.context().channel(),
                         ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(ROUTE_NOT_FOUND, command.routeId()))
                 ));
-    }
-
-    private void validateAssignedVehicle(HoldSeatCommand command, String merchantId) {
-        RouteAssignmentRecord assignment = routeAssignmentRepositoryPort.findActiveByRouteId(command.routeId())
-                .orElseThrow(() -> new BusinessException(
-                        command.metadata().requestId(),
-                        command.metadata().requestDateTime(),
-                        command.metadata().channel(),
-                        ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(VEHICLE_NOT_ASSIGNED_TO_ROUTE, command.routeId()))
-                ));
-
-        if (!RouteAssignmentStatus.ASSIGNED.equals(assignment.getStatus())
-                || !Objects.equals(merchantId, assignment.getMerchantId())
-                || !Objects.equals(command.vehicleId(), assignment.getVehicleId())) {
-            throw new BusinessException(
-                    command.metadata().requestId(),
-                    command.metadata().requestDateTime(),
-                    command.metadata().channel(),
-                    ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, String.format(VEHICLE_NOT_ASSIGNED_TO_ROUTE, command.routeId()))
-            );
-        }
     }
 }

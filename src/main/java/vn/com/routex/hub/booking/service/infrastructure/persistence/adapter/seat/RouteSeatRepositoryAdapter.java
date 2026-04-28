@@ -2,10 +2,10 @@ package vn.com.routex.hub.booking.service.infrastructure.persistence.adapter.sea
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import vn.com.go.routex.identity.security.log.SystemLog;
 import vn.com.routex.hub.booking.service.domain.seat.model.RouteSeat;
 import vn.com.routex.hub.booking.service.domain.seat.port.RouteSeatRepositoryPort;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.seat.repository.RouteSeatEntityRepository;
-import vn.com.routex.hub.booking.service.infrastructure.persistence.log.SystemLog;
 
 import java.util.List;
 import java.util.Optional;

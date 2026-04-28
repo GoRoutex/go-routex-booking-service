@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import vn.com.routex.hub.booking.service.domain.assignment.RouteAssignmentStatus;
+import vn.com.routex.hub.booking.service.domain.route.model.RouteAssignmentRecord;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.assignment.entity.RouteAssignmentEntity;
 
 import java.util.List;
@@ -51,4 +52,6 @@ public interface RouteAssignmentEntityRepository extends JpaRepository<RouteAssi
             @Param("merchantId") String merchantId,
             @Param("status") String status
     );
+
+    Optional<RouteAssignmentEntity> findByRouteId(String routeId);
 }

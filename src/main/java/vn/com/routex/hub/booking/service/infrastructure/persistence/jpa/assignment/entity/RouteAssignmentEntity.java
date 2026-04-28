@@ -15,6 +15,7 @@ import lombok.experimental.SuperBuilder;
 import vn.com.routex.hub.booking.service.domain.assignment.RouteAssignmentStatus;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.entity.AbstractAuditingEntity;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 @Getter
@@ -24,7 +25,6 @@ import java.time.OffsetDateTime;
 @Entity
 @SuperBuilder
 @Table(name = "ROUTE_ASSIGNMENT")
-
 public class RouteAssignmentEntity extends AbstractAuditingEntity {
     @Id
     private String id;
@@ -40,6 +40,9 @@ public class RouteAssignmentEntity extends AbstractAuditingEntity {
 
     @Column(name = "DRIVER_ID")
     private String driverId;
+
+    @Column(name = "TICKET_PRICE")
+    private BigDecimal ticketPrice;
 
     @Column(name = "VEHICLE_ID")
     private String vehicleId;

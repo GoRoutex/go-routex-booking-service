@@ -7,14 +7,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
+import vn.com.go.routex.identity.security.log.SystemLog;
 import vn.com.routex.hub.booking.service.application.handler.impl.RouteEventHandler;
-import vn.com.routex.hub.booking.service.controller.models.base.BaseRequest;
+import vn.com.routex.hub.booking.service.interfaces.models.base.BaseRequest;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.config.KafkaEventPublisher;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.event.DomainEvent;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.event.RouteOpenForBookingEvent;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.event.RouteSellableEvent;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.exception.BusinessException;
-import vn.com.routex.hub.booking.service.infrastructure.persistence.log.SystemLog;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.ExceptionUtils;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.JsonUtils;
 

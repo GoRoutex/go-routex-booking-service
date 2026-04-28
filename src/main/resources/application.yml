@@ -117,6 +117,13 @@ identity:
 
 logging:
   level:
-    org.springframework.security: DEBUG
+    org.springframework: WARN
     org.springframework.kafka: INFO
     org.apache.kafka: WARN
+    root: INFO
+
+booking:
+  hold-expiration:
+    fixed-delay-ms: ${BOOKING_HOLD_EXPIRATION_FIXED_DELAY_MS:15000}
+    initial-delay-ms: ${BOOKING_HOLD_EXPIRATION_INITIAL_DELAY_MS:15000}
+    batch-size: ${BOOKING_HOLD_EXPIRATION_BATCH_SIZE:100}

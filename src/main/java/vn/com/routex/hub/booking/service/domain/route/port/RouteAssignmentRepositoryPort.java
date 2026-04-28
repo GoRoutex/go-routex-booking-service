@@ -11,6 +11,9 @@ import java.util.Optional;
 public interface RouteAssignmentRepositoryPort {
     boolean existsActiveByRouteId(String routeId);
 
+
+    Optional<RouteAssignmentRecord> findByRouteId(String routeId);
+
     boolean existsActiveByRouteId(String routeId, String merchantId);
 
     Optional<RouteAssignmentRecord> findActiveByRouteId(String routeId);
