@@ -8,6 +8,7 @@ import java.util.List;
 
 @Builder
 public record HoldSeatResult(
+        HoldSeatBookingResult booking,
         List<HoldSeatItemResult> seats
 ) {
     @Builder
@@ -26,8 +27,7 @@ public record HoldSeatResult(
             String routeId,
             String seatNo,
             String status,
-            String holdToken,
-            HoldSeatBookingResult booking
+            String holdToken
     ) {
     }
 }

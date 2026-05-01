@@ -11,17 +11,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.WebRequest;
 import vn.com.go.routex.identity.security.log.SystemLog;
-import vn.com.routex.hub.booking.service.application.command.common.RequestContext;
 import vn.com.routex.hub.booking.service.application.command.seat.HoldSeatCommand;
 import vn.com.routex.hub.booking.service.application.command.seat.HoldSeatResult;
-import vn.com.routex.hub.booking.service.application.command.seat.SeatItemResult;
 import vn.com.routex.hub.booking.service.application.services.HoldSeatService;
-import vn.com.routex.hub.booking.service.interfaces.models.base.BaseRequest;
+import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.HttpUtils;
 import vn.com.routex.hub.booking.service.interfaces.models.result.ApiResult;
-import vn.com.routex.hub.booking.service.interfaces.models.seat.GetAllSeatResponse;
 import vn.com.routex.hub.booking.service.interfaces.models.seat.HoldSeatRequest;
 import vn.com.routex.hub.booking.service.interfaces.models.seat.HoldSeatResponse;
-import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.HttpUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,8 +27,6 @@ import static vn.com.routex.hub.booking.service.infrastructure.persistence.const
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ApiConstant.BOOKING_PATH;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ApiConstant.HOLD_SEAT_PATH;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ApiConstant.TRIP_PATH;
-import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.SUCCESS_CODE;
-import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.SUCCESS_MESSAGE;
 
 @RestController
 @RequestMapping(API_PATH + API_VERSION + BOOKING_PATH)
@@ -63,23 +57,24 @@ public class RouteSeatManagementController {
 
         List<HoldSeatResponse.HoldSeatResponseData> responseData = result.seats().stream()
                 .map(item -> {
-                    HoldSeatResponse.HoldSeatResponseBookingInfo bookingInfo = getHoldSeatResponseBookingInfo(item);
                     return HoldSeatResponse.HoldSeatResponseData.builder()
                             .routeId(item.routeId())
                             .seatNo(item.seatNo())
                             .status(item.status())
                             .holdToken(item.holdToken())
-                            .booking(bookingInfo)
                             .build();
                 })
                 .collect(Collectors.toList());
+
+        HoldSeatResponse.HoldSeatResponseBookingInfo bookingInfo = getHoldSeatResponseBookingInfo(result);
 
         HoldSeatResponse response = HoldSeatResponse.builder()
                 .requestId(request.getRequestId())
                 .requestDateTime(request.getRequestDateTime())
                 .channel(request.getChannel())
-                .result(successResult())
+                .result(ApiResult.buildSuccess())
                 .data(responseData)
+                .booking(bookingInfo)
                 .build();
 
 
@@ -88,7 +83,7 @@ public class RouteSeatManagementController {
         return HttpUtils.buildResponse(request, response);
     }
 
-    private static HoldSeatResponse.HoldSeatResponseBookingInfo getHoldSeatResponseBookingInfo(HoldSeatResult.HoldSeatItemResult item) {
+    private static HoldSeatResponse.HoldSeatResponseBookingInfo getHoldSeatResponseBookingInfo(HoldSeatResult item) {
         return HoldSeatResponse.HoldSeatResponseBookingInfo.builder()
                 .bookingId(item.booking().bookingId())
                 .bookingCode(item.booking().bookingCode())
@@ -98,28 +93,5 @@ public class RouteSeatManagementController {
                 .currency(item.booking().currency())
                 .build();
 
-    }
-
-    private RequestContext toMetadata(BaseRequest request) {
-        return RequestContext.builder()
-                .requestId(request.getRequestId())
-                .requestDateTime(request.getRequestDateTime())
-                .channel(request.getChannel())
-                .build();
-    }
-
-    private GetAllSeatResponse.GetAvailableSeatResponseData toSeatResponse(SeatItemResult item) {
-        return GetAllSeatResponse.GetAvailableSeatResponseData.builder()
-                .routeId(item.routeId())
-                .seatNo(item.seatNo())
-                .status(item.status())
-                .build();
-    }
-
-    private ApiResult successResult() {
-        return ApiResult.builder()
-                .responseCode(SUCCESS_CODE)
-                .description(SUCCESS_MESSAGE)
-                .build();
     }
 }

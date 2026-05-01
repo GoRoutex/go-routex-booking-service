@@ -9,6 +9,7 @@ public class ErrorConstant {
     public static final String AUTHORIZATION_ERROR = "3200";
     public static final String AUTHORITIES_ERROR = "You are not authorized for this action";
     public static final String TIMEOUT_ERROR_MESSAGE = "Timeout";
+    public static final String PAYMENT_NOT_FOUND = "Payment with id %s not found";
     public static final String RECORD_NOT_FOUND = "1407";
     public static final String ASSIGNMENT_NOT_FOUND = "Assignment with routeId %s not found";
     public static final String FLARE_CONFIG_NOT_FOUND = "Flare Config not found";

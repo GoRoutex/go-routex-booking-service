@@ -14,6 +14,6 @@ public interface PaymentRepositoryPort {
 
     Optional<Payment> findById(String id);
 
-    Optional<Payment> findByBookingIdAndStatus(String bookingId, PaymentStatus status);
+    Optional<Payment> findByBookingCode(String bookingCode);
 }
 

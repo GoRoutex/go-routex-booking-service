@@ -26,7 +26,9 @@ import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.Except
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.DUPLICATE_ERROR;
@@ -67,7 +69,11 @@ public class RouteEventHandler implements RouteEvent {
         sLog.info("[ROUTE-SEAT] Generate seats routeId={} vehicleId={} seatCapacity={} hasFloor={}",
                 payload.routeId(), payload.vehicleId(), template.getSeatCapacity(), template.isHasFloor());
 
-        List<RouteSeat> seats = generateSeatNos(vehicle, template).stream()
+        List<SeatTemplate> seatTemplates = generateSeatNos(vehicle, template);
+        Map<String, SeatTemplate> templateMap = seatTemplates.stream()
+                .collect(Collectors.toMap(SeatTemplate::getId, Function.identity()));
+
+        List<RouteSeat> seats = seatTemplates.stream()
                 .map(seatTemplate -> RouteSeat.builder()
                         .id(UUID.randomUUID().toString())
                         .routeId(payload.routeId())
@@ -82,13 +88,19 @@ public class RouteEventHandler implements RouteEvent {
 
         List<RouteSeat> savedSeats = routeSeatRepositoryPort.saveAll(seats);
 
-        sLog.info("saved seats: {}", savedSeats);
         List<RouteCacheSeat> cacheData = savedSeats.stream()
-                .map(seat -> RouteCacheSeat.builder()
-                        .routeId(seat.getRouteId())
-                        .seatNo(seat.getSeatNo())
-                        .status(seat.getStatus())
-                        .build())
+                .map(seat -> {
+                    SeatTemplate seatTemplate = templateMap.get(seat.getSeatTemplateId());
+                    return RouteCacheSeat.builder()
+                            .routeId(seat.getRouteId())
+                            .seatId(seat.getId())
+                            .seatNo(seat.getSeatNo())
+                            .status(seat.getStatus())
+                            .floor(seatTemplate.getFloor())
+                            .rowNo(seatTemplate.getRowNo())
+                            .colNo(seatTemplate.getColumnNo())
+                            .build();
+                })
                 .toList();
 
         sLog.info("[ROUTE-CACHE] Route Seat Cache Data: {}", cacheData);
@@ -109,13 +121,13 @@ public class RouteEventHandler implements RouteEvent {
 
         List<SeatTemplate> seatTemplateList;
 
-        if(!hasFloor) {
+        if (!hasFloor) {
             seatTemplateList = seatTemplateRepositoryPort.findByVehicleTemplateIdAndFloor(template.getId(), SeatFloor.NONE);
         } else {
             seatTemplateList = seatTemplateRepositoryPort.findByVehicleTemplateId(template.getId());
         }
 
-        if(seatTemplateList.isEmpty()) {
+        if (seatTemplateList.isEmpty()) {
             throw new BusinessException(ExceptionUtils.buildResultResponse(
                     RECORD_NOT_FOUND, String.format(SEAT_TEMPLATE_NOT_FOUND, template.getId())));
         }

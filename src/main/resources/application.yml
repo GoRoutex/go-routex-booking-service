@@ -36,8 +36,7 @@ spring:
       booking-cancelled: "routex.booking.cancelled"
       booking-failed: "routex.booking.failed"
       ticket-issued: "routex.ticket.issued"
-      payment-initiated: "routex.payment.initiated"
-      payment-completed: "routex.payment.completed"
+      payment-succeeded: "routex.payment.succeeded"
       payment-failed: "routex.payment.failed"
       payment-refunded: "routex.payment.refunded"
       seat-reserved: "routex.seat.reserved"
@@ -50,8 +49,7 @@ spring:
     topics:
       routes: "route.management.event"
       booking: "route.bookings.event"
-      payment-success: "payment.success.event.management"
-      payment-failed: "payment.failed.event.management"
+      payments: "route.payments.event"
       seats: "seat.event.management"
       notifications: "notification.event.management"
       dead-letter: "bus-dead-letter-queue"
@@ -59,6 +57,8 @@ spring:
     group-id:
       bookings: "booking-service"
       payments: "payment-service"
+      payment-succeeded: "booking-service-payment-succeeded"
+      payment-failed: "booking-service-payment-failed"
       routes: "routes-service"
 
     listener:

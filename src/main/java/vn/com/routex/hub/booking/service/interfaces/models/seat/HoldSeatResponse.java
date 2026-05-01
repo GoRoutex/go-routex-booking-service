@@ -17,6 +17,8 @@ import java.util.List;
 @SuperBuilder
 public class HoldSeatResponse extends BaseResponse<List<HoldSeatResponse.HoldSeatResponseData>> {
 
+    private HoldSeatResponseBookingInfo booking;
+
     @AllArgsConstructor
     @NoArgsConstructor
     @Getter
@@ -40,6 +42,5 @@ public class HoldSeatResponse extends BaseResponse<List<HoldSeatResponse.HoldSea
         private String seatNo;
         private String status;
         private String holdToken;
-        private HoldSeatResponseBookingInfo booking;
     }
 }

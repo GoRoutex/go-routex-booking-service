@@ -11,7 +11,7 @@ public interface BookingRepositoryPort {
 
     Optional<Booking> findById(String bookingId);
 
-    Optional<Booking> findByIdForUpdate(String bookingId);
+    Optional<Booking> findByBookingCodeForUpdate(String bookingId);
 
     Optional<Booking> findById(String bookingId, String merchantId);
 

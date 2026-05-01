@@ -21,9 +21,9 @@ public interface BookingEntityRepository extends JpaRepository<BookingEntity, St
     @Query("""
             select b
             from BookingEntity b
-            where b.id = :bookingId
+            where b.bookingCode = :bookingCode
             """)
-    Optional<BookingEntity> findByIdForUpdate(@Param("bookingId") String bookingId);
+    Optional<BookingEntity> findByBookingCodeForUpdate(@Param("bookingCode") String bookingCode);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""

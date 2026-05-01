@@ -22,9 +22,11 @@ public class Ticket extends AbstractAuditingEntity {
     private String bookingId;
     private String bookingSeatId;
     private String routeId;
+    private String vehicleId;
     private String seatNumber;
     private String customerName;
     private String customerPhone;
+    private String customerEmail;
     private BigDecimal price;
     private TicketStatus status;
     private OffsetDateTime issuedAt;

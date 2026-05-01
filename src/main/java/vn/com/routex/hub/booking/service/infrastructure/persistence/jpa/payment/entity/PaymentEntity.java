@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import vn.com.routex.hub.booking.service.domain.payment.PaymentMethod;
 import vn.com.routex.hub.booking.service.domain.payment.PaymentStatus;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.entity.AbstractAuditingEntity;
 
@@ -29,14 +30,12 @@ public class PaymentEntity extends AbstractAuditingEntity {
     @Id
     private String id;
 
-    @Column(name = "BOOKING_ID", nullable = false)
-    private String bookingId;
-
-    @Column(name = "CODE")
-    private String code;
+    @Column(name = "BOOKING_CODE", nullable = false)
+    private String bookingCode;
 
     @Column(name = "METHOD")
-    private String method;
+    @Enumerated(EnumType.STRING)
+    private PaymentMethod method;
 
     @Column(name = "AMOUNT")
     private BigDecimal amount;
@@ -48,17 +47,11 @@ public class PaymentEntity extends AbstractAuditingEntity {
     @Column(name = "STATUS")
     private PaymentStatus status;
 
-    @Column(name = "CHECKOUT_URL")
-    private String checkoutUrl;
-
-    @Column(name = "PAYMENT_TOKEN")
-    private String paymentToken;
+    @Column(name = "TXN_REF", unique = true)
+    private String txnRef;
 
     @Column(name = "PAID_AT")
     private OffsetDateTime paidAt;
-
-    @Column(name = "EXPIRED_AT")
-    private OffsetDateTime expiredAt;
 
     @Column(name = "FAILED_AT")
     private OffsetDateTime failedAt;
