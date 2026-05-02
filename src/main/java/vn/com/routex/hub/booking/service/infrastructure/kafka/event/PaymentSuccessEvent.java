@@ -2,7 +2,7 @@ package vn.com.routex.hub.booking.service.infrastructure.kafka.event;
 
 
 import lombok.Builder;
-import vn.com.routex.hub.booking.service.domain.payment.PaymentStatus;
+import vn.com.routex.hub.booking.service.domain.booking.PaymentStatus;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;

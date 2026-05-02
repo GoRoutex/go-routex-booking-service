@@ -127,3 +127,7 @@ booking:
     fixed-delay-ms: ${BOOKING_HOLD_EXPIRATION_FIXED_DELAY_MS:15000}
     initial-delay-ms: ${BOOKING_HOLD_EXPIRATION_INITIAL_DELAY_MS:15000}
     batch-size: ${BOOKING_HOLD_EXPIRATION_BATCH_SIZE:100}
+
+clients:
+  payment-service:
+    base-url: ${PAYMENT_SERVICE_BASE_URL:http://localhost:8086}

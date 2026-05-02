@@ -13,6 +13,8 @@ public interface BookingRepositoryPort {
 
     Optional<Booking> findByBookingCodeForUpdate(String bookingId);
 
+    Optional<Booking> findByBookingCode(String bookingCode);
+
     Optional<Booking> findById(String bookingId, String merchantId);
 
     List<Booking> findExpiredPendingPaymentBookingsForUpdate(OffsetDateTime holdUntil, int limit);

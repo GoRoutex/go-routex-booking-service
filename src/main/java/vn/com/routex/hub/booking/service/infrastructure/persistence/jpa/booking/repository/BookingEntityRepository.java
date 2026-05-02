@@ -17,6 +17,8 @@ public interface BookingEntityRepository extends JpaRepository<BookingEntity, St
 
     Optional<BookingEntity> findByIdAndMerchantId(String id, String merchantId);
 
+    Optional<BookingEntity> findByBookingCode(String bookingCode);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
             select b

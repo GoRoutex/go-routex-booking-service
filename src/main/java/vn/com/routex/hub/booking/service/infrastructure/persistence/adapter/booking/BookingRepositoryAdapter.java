@@ -37,6 +37,11 @@ public class BookingRepositoryAdapter implements BookingRepositoryPort {
     }
 
     @Override
+    public Optional<Booking> findByBookingCode(String bookingCode) {
+        return bookingEntityRepository.findByBookingCode(bookingCode).map(bookingPersistenceMapper::toDomain);
+    }
+
+    @Override
     public Optional<Booking> findById(String bookingId, String merchantId) {
         return bookingEntityRepository.findByIdAndMerchantId(bookingId, merchantId).map(bookingPersistenceMapper::toDomain);
     }
