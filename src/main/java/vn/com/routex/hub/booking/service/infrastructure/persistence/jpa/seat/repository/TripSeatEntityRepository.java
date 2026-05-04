@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.seat.entity.TripSeatEntity;
-import vn.com.routex.hub.booking.service.interfaces.models.seat.RouteSeatView;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,17 +16,6 @@ import java.util.Optional;
 public interface TripSeatEntityRepository extends JpaRepository<TripSeatEntity, String> {
 
     boolean existsByTripId(String tripId);
-
-    @Query(value = """
-            SELECT rs.TRIP_ID AS tripId, count(rs) AS availableSeat
-                        FROM trip_seat RS
-                        WHERE RS.TRIP_ID in :tripIds
-                        AND status = :status
-                        GROUP BY rs.TRIP_ID;
-            """,
-            nativeQuery = true)
-    List<RouteSeatView> countByTripIdAndStatus(@Param("tripIds") List<String> tripIds,
-                                                @Param("status") String status);
 
     List<TripSeatEntity> findAllByTripIdOrderBySeatNoAsc(String tripId);
 
