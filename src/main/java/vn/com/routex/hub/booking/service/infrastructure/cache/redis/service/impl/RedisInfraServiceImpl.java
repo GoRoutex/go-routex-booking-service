@@ -6,8 +6,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import tools.jackson.databind.ObjectMapper;
+import vn.com.go.routex.identity.security.log.SystemLog;
 import vn.com.routex.hub.booking.service.infrastructure.cache.redis.service.RedisInfraService;
-import vn.com.routex.hub.booking.service.infrastructure.persistence.log.SystemLog;
 
 import java.util.Map;
 import java.util.Optional;

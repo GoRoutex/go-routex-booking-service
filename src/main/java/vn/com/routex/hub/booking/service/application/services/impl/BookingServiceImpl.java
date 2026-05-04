@@ -2,7 +2,9 @@ package vn.com.routex.hub.booking.service.application.services.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import vn.com.routex.hub.booking.service.application.dto.booking.CreateBookingCommand;
+import org.springframework.transaction.annotation.Transactional;
+import vn.com.go.routex.identity.security.log.SystemLog;
+import vn.com.routex.hub.booking.service.application.command.booking.CreateBookingCommand;
 import vn.com.routex.hub.booking.service.application.services.BookingService;
 import vn.com.routex.hub.booking.service.domain.booking.BookingSeatStatus;
 import vn.com.routex.hub.booking.service.domain.booking.BookingStatus;
@@ -10,80 +12,66 @@ import vn.com.routex.hub.booking.service.domain.booking.model.Booking;
 import vn.com.routex.hub.booking.service.domain.booking.model.BookingSeat;
 import vn.com.routex.hub.booking.service.domain.booking.port.BookingRepositoryPort;
 import vn.com.routex.hub.booking.service.domain.booking.port.BookingSeatRepositoryPort;
-import vn.com.routex.hub.booking.service.domain.seat.model.RouteSeat;
-import vn.com.routex.hub.booking.service.domain.vehicle.model.VehicleProfile;
-import vn.com.routex.hub.booking.service.domain.vehicle.model.VehicleTemplate;
-import vn.com.routex.hub.booking.service.domain.vehicle.port.VehicleRepositoryPort;
-import vn.com.routex.hub.booking.service.domain.vehicle.port.VehicleTemplateRepositoryPort;
+import vn.com.routex.hub.booking.service.domain.route.model.TripAssignmentRecord;
+import vn.com.routex.hub.booking.service.domain.route.port.TripAssignmentRepositoryPort;
+import vn.com.routex.hub.booking.service.domain.seat.model.TripSeat;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.exception.BusinessException;
-import vn.com.routex.hub.booking.service.infrastructure.persistence.log.SystemLog;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.ExceptionUtils;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
+import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.ASSIGNMENT_NOT_FOUND;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.RECORD_NOT_FOUND;
-import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.VEHICLE_NOT_FOUND;
 
 
 @Service
 @RequiredArgsConstructor
 public class BookingServiceImpl implements BookingService {
-    private final VehicleRepositoryPort vehicleRepositoryPort;
     private final BookingRepositoryPort bookingRepositoryPort;
     private final BookingSeatRepositoryPort bookingSeatRepositoryPort;
-    private final VehicleTemplateRepositoryPort vehicleTemplateRepositoryPort;
+    private final TripAssignmentRepositoryPort routeAssignmentRepositoryPort;
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
     @Override
-    public Booking createBooking(CreateBookingCommand command, List<RouteSeat> routeSeats) {
+    @Transactional
+    public Booking createBooking(CreateBookingCommand command, List<TripSeat> tripSeats) {
         sLog.info("[BOOK-SERVICE] Create Draft Booking Command: {}", command);
 
-        VehicleProfile vehicle = vehicleRepositoryPort.findById(command.vehicleId(), command.merchantId())
-                .orElseThrow(() -> new BusinessException(
-                        command.metadata().requestId(),
-                        command.metadata().requestDateTime(),
-                        command.metadata().channel(),
-                        ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, VEHICLE_NOT_FOUND)
-                ));
 
-        VehicleTemplate template = vehicleTemplateRepositoryPort.findById(vehicle.getTemplateId())
-                .orElseThrow(() -> new BusinessException(
-                        command.metadata().requestId(),
-                        command.metadata().requestDateTime(),
-                        command.metadata().channel(),
-                        ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, VEHICLE_NOT_FOUND)
-                ));
+        TripAssignmentRecord assignmentRecord = routeAssignmentRepositoryPort.findActiveByTripId(command.tripId())
+                .orElseThrow(() -> new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
+                        ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(ASSIGNMENT_NOT_FOUND, command.tripId()))));
 
-        BigDecimal basePrice = template.getTicketPrice();
-        BigDecimal totalAmount = basePrice.multiply(BigDecimal.valueOf(routeSeats.size()));
+        BigDecimal basePrice = assignmentRecord.getTicketPrice();
+        BigDecimal totalAmount = basePrice.multiply(BigDecimal.valueOf(tripSeats.size()));
 
         Booking booking = Booking.builder()
                 .id(UUID.randomUUID().toString())
                 .bookingCode(bookingRepositoryPort.generateBookingCode())
-                .routeId(command.routeId())
+                .tripId(command.tripId())
                 .merchantId(command.merchantId())
-                .vehicleId(command.vehicleId())
+                .vehicleId(assignmentRecord.getVehicleId())
                 .customerId(command.customerId())
                 .customerName(command.customerName())
                 .customerPhone(command.customerPhone())
                 .customerEmail(command.customerEmail())
-                .channel(command.metadata().channel())
-                .seatCount(routeSeats.size())
+                .channel(command.context().channel())
+                .seatCount(tripSeats.size())
                 .totalAmount(totalAmount)
-                .currency(command.currency())
+                .currency("VND")
                 .status(BookingStatus.PENDING_PAYMENT)
                 .heldAt(command.heldAt())
                 .holdUntil(command.holdUntil())
                 .creator(command.holdBy())
                 .build();
 
-        List<BookingSeat> bookingSeats = routeSeats.stream()
+        List<BookingSeat> bookingSeats = tripSeats.stream()
                 .map(seat -> BookingSeat.builder()
                         .id(UUID.randomUUID().toString())
                         .bookingId(booking.getId())
-                        .routeId(command.routeId())
+                        .tripId(command.tripId())
                         .seatNo(seat.getSeatNo())
                         .creator(command.holdBy())
                         .status(BookingSeatStatus.HELD)

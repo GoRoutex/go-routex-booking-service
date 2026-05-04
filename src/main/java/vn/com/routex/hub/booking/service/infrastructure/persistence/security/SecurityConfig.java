@@ -49,6 +49,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/actuator/**",
                                 "/error",
+                                "/api/v1/booking-service/trips/hold-seat",
+                                "/api/v1/booking-service/payments/context",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html"
@@ -59,9 +61,7 @@ public class SecurityConfig {
                         .accessDeniedHandler(accessDeniedHandler)
                         .authenticationEntryPoint(authenticationEntryPoint)
                 )
-                // Populate SecurityContext from Authorization: Bearer <jwt>
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                // Request/response logging + request metadata (requestId, channel, ...) for our API layer
                 .addFilterAfter(apiFilter, JwtAuthenticationFilter.class)
                 .build();
     }

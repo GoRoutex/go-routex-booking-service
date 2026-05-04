@@ -17,7 +17,7 @@ import java.math.BigDecimal;
 public class BookingSeat {
     private String id;
     private String bookingId;
-    private String routeId;
+    private String tripId;
     private String seatNo;
     private BigDecimal price;
     private BookingSeatStatus status;

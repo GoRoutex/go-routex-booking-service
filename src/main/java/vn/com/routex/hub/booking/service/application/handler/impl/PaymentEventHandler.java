@@ -4,19 +4,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import vn.com.go.routex.identity.security.log.SystemLog;
 import vn.com.routex.hub.booking.service.application.handler.PaymentEvent;
-import vn.com.routex.hub.booking.service.controller.models.base.BaseRequest;
 import vn.com.routex.hub.booking.service.domain.booking.BookingSeatStatus;
 import vn.com.routex.hub.booking.service.domain.booking.BookingStatus;
 import vn.com.routex.hub.booking.service.domain.booking.model.Booking;
 import vn.com.routex.hub.booking.service.domain.booking.model.BookingSeat;
 import vn.com.routex.hub.booking.service.domain.booking.port.BookingRepositoryPort;
 import vn.com.routex.hub.booking.service.domain.booking.port.BookingSeatRepositoryPort;
-import vn.com.routex.hub.booking.service.domain.payment.model.Payment;
-import vn.com.routex.hub.booking.service.domain.payment.port.PaymentRepositoryPort;
 import vn.com.routex.hub.booking.service.domain.seat.SeatStatus;
-import vn.com.routex.hub.booking.service.domain.seat.model.RouteSeat;
-import vn.com.routex.hub.booking.service.domain.seat.port.RouteSeatRepositoryPort;
+import vn.com.routex.hub.booking.service.domain.seat.model.TripSeat;
+import vn.com.routex.hub.booking.service.domain.seat.port.TripSeatRepositoryPort;
 import vn.com.routex.hub.booking.service.domain.ticket.TicketStatus;
 import vn.com.routex.hub.booking.service.domain.ticket.model.Ticket;
 import vn.com.routex.hub.booking.service.domain.ticket.port.TicketRepositoryPort;
@@ -27,12 +25,13 @@ import vn.com.routex.hub.booking.service.infrastructure.kafka.event.PaymentSucce
 import vn.com.routex.hub.booking.service.infrastructure.kafka.event.TicketIssuedEvent;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.record.BookingAggregate;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.exception.BusinessException;
-import vn.com.routex.hub.booking.service.infrastructure.persistence.log.SystemLog;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.ExceptionUtils;
+import vn.com.routex.hub.booking.service.interfaces.models.base.BaseRequest;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.RECORD_NOT_FOUND;
 
@@ -41,9 +40,8 @@ import static vn.com.routex.hub.booking.service.infrastructure.persistence.const
 public class PaymentEventHandler implements PaymentEvent {
 
     private final BookingRepositoryPort bookingRepositoryPort;
-    private final RouteSeatRepositoryPort routeSeatRepositoryPort;
+    private final TripSeatRepositoryPort tripSeatRepositoryPort;
     private final BookingSeatRepositoryPort bookingSeatRepositoryPort;
-    private final PaymentRepositoryPort paymentRepositoryPort;
     private final TicketRepositoryPort ticketRepositoryPort;
     private final KafkaEventPublisher kafkaEventPublisher;
 
@@ -55,17 +53,11 @@ public class PaymentEventHandler implements PaymentEvent {
 
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
-
-    /**
-     * Update status for Booking, BookingSeat, RouteSeat after success payment
-     * @param event
-     */
     @Override
     @Transactional
     public void updateSuccessPayment(DomainEvent event, BaseRequest context, PaymentSuccessEvent payload) {
         BookingAggregate aggregate = loadAggregate(
-                payload.paymentId(),
-                payload.bookingId(),
+                payload.bookingCode(),
                 context.getRequestId(),
                 context.getRequestDateTime(),
                 context.getChannel()
@@ -75,54 +67,54 @@ public class PaymentEventHandler implements PaymentEvent {
             sLog.info("[BOOKING-SERVICE] Payment success event already processed for bookingId={}", aggregate.booking().getId());
             return;
         }
+        if (aggregate.booking().getStatus() == BookingStatus.CANCELLED
+                || aggregate.booking().getStatus() == BookingStatus.EXPIRED) {
+            sLog.info("[BOOKING-SERVICE] Ignore payment success for bookingId={} because current status={}",
+                    aggregate.booking().getId(), aggregate.booking().getStatus());
+            return;
+        }
 
-        aggregate.routeSeats().forEach(routeSeat -> routeSeat.setStatus(SeatStatus.SOLD));
-        List<Ticket> issuedTickets = createTickets(aggregate);
+        OffsetDateTime paidAt = payload.paidAt() != null ? payload.paidAt() : OffsetDateTime.now();
+        aggregate.tripSeats().forEach(routeSeat -> routeSeat.setStatus(SeatStatus.SOLD));
+        List<Ticket> issuedTickets = createTickets(aggregate, paidAt);
         List<BookingSeat> reservedSeats = attachIssuedTickets(aggregate.bookingSeats(), issuedTickets);
         aggregate.booking().setStatus(BookingStatus.CONFIRMED);
         saveAggregate(aggregate, reservedSeats, issuedTickets);
-        publishTicketIssuedEvent(context, aggregate, issuedTickets);
+        publishTicketIssuedEvent(context, aggregate, issuedTickets, paidAt);
     }
 
     @Override
     @Transactional
     public void updateFailEvent(DomainEvent event, BaseRequest context, PaymentFailedEvent payload) {
         BookingAggregate aggregate = loadAggregate(
-                payload.paymentId(),
-                payload.bookingId(),
+                payload.bookingCode(),
                 context.getRequestId(),
                 context.getRequestDateTime(),
                 context.getChannel()
         );
 
-        if (aggregate.booking().getStatus() == BookingStatus.CANCELLED) {
-            sLog.info("[BOOKING-SERVICE] Payment failed event already processed for bookingId={}", aggregate.booking().getId());
+        if (aggregate.booking().getStatus() == BookingStatus.CANCELLED
+                || aggregate.booking().getStatus() == BookingStatus.EXPIRED) {
+            sLog.info("[BOOKING-SERVICE] Payment failed event ignored for bookingId={} because current status={}",
+                    aggregate.booking().getId(), aggregate.booking().getStatus());
             return;
         }
 
-        aggregate.routeSeats().forEach(routeSeat -> routeSeat.setStatus(SeatStatus.AVAILABLE));
+        aggregate.tripSeats().forEach(routeSeat -> routeSeat.setStatus(SeatStatus.AVAILABLE));
         List<BookingSeat> cancelledSeats = aggregate.bookingSeats().stream()
                 .map(this::toCancelledBookingSeat)
                 .toList();
         aggregate.booking().setStatus(BookingStatus.CANCELLED);
-
         saveAggregate(aggregate, cancelledSeats, List.of());
     }
 
     private BookingAggregate loadAggregate(
-            String paymentId,
-            String bookingId,
+            String bookingCode,
             String requestId,
-        String requestDateTime,
-        String channel
+            String requestDateTime,
+            String channel
     ) {
-        Payment payment = paymentRepositoryPort.findById(paymentId)
-                .orElseThrow(() -> new BusinessException(
-                        requestId, requestDateTime, channel,
-                        ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, "Payment not found")
-                ));
-
-        Booking booking = bookingRepositoryPort.findById(bookingId)
+        Booking booking = bookingRepositoryPort.findByBookingCodeForUpdate(bookingCode)
                 .orElseThrow(() -> new BusinessException(
                         requestId, requestDateTime, channel,
                         ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, "Booking not found")
@@ -131,37 +123,37 @@ public class PaymentEventHandler implements PaymentEvent {
         List<BookingSeat> bookingSeats = bookingSeatRepositoryPort.findAllByBookingId(booking.getId());
         if (bookingSeats.isEmpty()) {
             throw new BusinessException(
-                        requestId, requestDateTime, channel,
-                        ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, "Booking Seat not found")
-                );
+                    requestId, requestDateTime, channel,
+                    ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, "Booking Seat not found")
+            );
         }
 
-        List<RouteSeat> routeSeats = bookingSeats.stream()
-                .map(bookingSeat -> routeSeatRepositoryPort.findByRouteIdAndSeatNo(bookingSeat.getRouteId(), bookingSeat.getSeatNo())
+        List<TripSeat> tripSeats = bookingSeats.stream()
+                .map(bookingSeat -> tripSeatRepositoryPort.findByTripIdAndSeatNo(bookingSeat.getTripId(), bookingSeat.getSeatNo())
                         .orElseThrow(() -> new BusinessException(
                                 requestId, requestDateTime, channel,
                                 ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, "Route Seat not found")
                         )))
                 .toList();
 
-        return new BookingAggregate(payment, booking, bookingSeats, routeSeats);
+        return new BookingAggregate(booking, bookingSeats, tripSeats);
     }
 
-    private List<Ticket> createTickets(BookingAggregate aggregate) {
-        OffsetDateTime issuedAt = aggregate.payment().getPaidAt() != null
-                ? aggregate.payment().getPaidAt()
-                : OffsetDateTime.now();
+    private List<Ticket> createTickets(BookingAggregate aggregate, OffsetDateTime paidAt) {
+        OffsetDateTime issuedAt = paidAt != null ? paidAt : OffsetDateTime.now();
 
         return aggregate.bookingSeats().stream()
-                .map(bookingSeat -> (Ticket) Ticket.builder()
+                .map(bookingSeat -> Ticket.builder()
                         .id(UUID.randomUUID().toString())
                         .ticketCode(ticketRepositoryPort.generateTicketCode())
                         .bookingId(aggregate.booking().getId())
                         .bookingSeatId(bookingSeat.getId())
-                        .routeId(bookingSeat.getRouteId())
+                        .vehicleId(aggregate.booking().getVehicleId())
+                        .tripId(bookingSeat.getTripId())
                         .seatNumber(bookingSeat.getSeatNo())
                         .customerName(aggregate.booking().getCustomerName())
                         .customerPhone(aggregate.booking().getCustomerPhone())
+                        .customerEmail(aggregate.booking().getCustomerEmail())
                         .price(bookingSeat.getPrice())
                         .status(TicketStatus.ISSUED)
                         .issuedAt(issuedAt)
@@ -170,7 +162,7 @@ public class PaymentEventHandler implements PaymentEvent {
                         .updatedAt(issuedAt)
                         .updatedBy(aggregate.booking().getCreator())
                         .build())
-                .toList();
+                .collect(Collectors.toList());
     }
 
     private List<BookingSeat> attachIssuedTickets(List<BookingSeat> bookingSeats, List<Ticket> tickets) {
@@ -184,7 +176,7 @@ public class PaymentEventHandler implements PaymentEvent {
                     return BookingSeat.builder()
                             .id(bookingSeat.getId())
                             .bookingId(bookingSeat.getBookingId())
-                            .routeId(bookingSeat.getRouteId())
+                            .tripId(bookingSeat.getTripId())
                             .seatNo(bookingSeat.getSeatNo())
                             .price(bookingSeat.getPrice())
                             .status(BookingSeatStatus.RESERVED)
@@ -199,7 +191,7 @@ public class PaymentEventHandler implements PaymentEvent {
         return BookingSeat.builder()
                 .id(bookingSeat.getId())
                 .bookingId(bookingSeat.getBookingId())
-                .routeId(bookingSeat.getRouteId())
+                .tripId(bookingSeat.getTripId())
                 .seatNo(bookingSeat.getSeatNo())
                 .price(bookingSeat.getPrice())
                 .status(BookingSeatStatus.CANCELLED)
@@ -209,18 +201,18 @@ public class PaymentEventHandler implements PaymentEvent {
     }
 
     private void saveAggregate(BookingAggregate aggregate, List<BookingSeat> bookingSeats, List<Ticket> tickets) {
-        routeSeatRepositoryPort.saveAll(aggregate.routeSeats());
+        tripSeatRepositoryPort.saveAll(aggregate.tripSeats());
         if (!tickets.isEmpty()) {
             ticketRepositoryPort.saveAll(tickets);
         }
         bookingSeatRepositoryPort.saveAll(bookingSeats);
         bookingRepositoryPort.save(aggregate.booking());
-        paymentRepositoryPort.save(aggregate.payment());
     }
 
     private void publishTicketIssuedEvent(BaseRequest context,
                                           BookingAggregate aggregate,
-                                          List<Ticket> issuedTickets) {
+                                          List<Ticket> issuedTickets,
+                                          OffsetDateTime paidAt) {
         TicketIssuedEvent payload = TicketIssuedEvent.builder()
                 .bookingId(aggregate.booking().getId())
                 .bookingCode(aggregate.booking().getBookingCode())
@@ -228,10 +220,10 @@ public class PaymentEventHandler implements PaymentEvent {
                 .customerName(aggregate.booking().getCustomerName())
                 .customerPhone(aggregate.booking().getCustomerPhone())
                 .customerEmail(aggregate.booking().getCustomerEmail())
-                .routeId(aggregate.booking().getRouteId())
+                .tripId(aggregate.booking().getTripId())
                 .totalAmount(aggregate.booking().getTotalAmount())
                 .currency(aggregate.booking().getCurrency())
-                .paidAt(aggregate.payment().getPaidAt())
+                .paidAt(paidAt)
                 .tickets(issuedTickets.stream()
                         .map(ticket -> TicketIssuedEvent.TicketIssuedItem.builder()
                                 .ticketId(ticket.getId())

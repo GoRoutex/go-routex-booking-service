@@ -38,8 +38,11 @@ public class TicketEntity extends AbstractAuditingEntity {
     @Column(name = "BOOKING_SEAT_ID")
     private String bookingSeatId;
 
-    @Column(name = "ROUTE_ID")
-    private String routeId;
+    @Column(name = "TRIP_ID")
+    private String tripId;
+
+    @Column(name = "VEHICLE_ID")
+    private String vehicleId;
 
     @Column(name = "SEAT_NUMBER")
     private String seatNumber;
@@ -49,6 +52,9 @@ public class TicketEntity extends AbstractAuditingEntity {
 
     @Column(name = "CUSTOMER_PHONE")
     private String customerPhone;
+
+    @Column(name = "CUSTOMER_EMAIL")
+    private String customerEmail;
 
     @Column(name = "PRICE")
     private BigDecimal price;

@@ -2,10 +2,10 @@ package vn.com.routex.hub.booking.service.application.services.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import vn.com.routex.hub.booking.service.application.dto.ticket.FetchTicketDetailQuery;
-import vn.com.routex.hub.booking.service.application.dto.ticket.FetchTicketDetailResult;
-import vn.com.routex.hub.booking.service.application.dto.ticket.FetchTicketsQuery;
-import vn.com.routex.hub.booking.service.application.dto.ticket.FetchTicketsResult;
+import vn.com.routex.hub.booking.service.application.command.ticket.FetchTicketDetailQuery;
+import vn.com.routex.hub.booking.service.application.command.ticket.FetchTicketDetailResult;
+import vn.com.routex.hub.booking.service.application.command.ticket.FetchTicketsQuery;
+import vn.com.routex.hub.booking.service.application.command.ticket.FetchTicketsResult;
 import vn.com.routex.hub.booking.service.application.services.TicketQueryService;
 import vn.com.routex.hub.booking.service.domain.common.PagedResult;
 import vn.com.routex.hub.booking.service.domain.ticket.model.Ticket;
@@ -51,7 +51,7 @@ public class TicketQueryServiceImpl implements TicketQueryService {
                         .ticketCode(ticket.getTicketCode())
                         .bookingId(ticket.getBookingId())
                         .bookingSeatId(ticket.getBookingSeatId())
-                        .routeId(ticket.getRouteId())
+                        .tripId(ticket.getTripId())
                         .seatNumber(ticket.getSeatNumber())
                         .customerName(ticket.getCustomerName())
                         .customerPhone(ticket.getCustomerPhone())
@@ -93,7 +93,7 @@ public class TicketQueryServiceImpl implements TicketQueryService {
                 .ticketCode(ticket.getTicketCode())
                 .bookingId(ticket.getBookingId())
                 .bookingSeatId(ticket.getBookingSeatId())
-                .routeId(ticket.getRouteId())
+                .tripId(ticket.getTripId())
                 .seatNumber(ticket.getSeatNumber())
                 .customerName(ticket.getCustomerName())
                 .customerPhone(ticket.getCustomerPhone())

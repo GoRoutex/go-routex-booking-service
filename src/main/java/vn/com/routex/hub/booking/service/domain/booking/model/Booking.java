@@ -18,7 +18,7 @@ import java.time.OffsetDateTime;
 public class Booking {
     private String id;
     private String bookingCode;
-    private String routeId;
+    private String tripId;
     private String merchantId;
     private String vehicleId;
     private String customerId;

@@ -31,8 +31,8 @@ public class BookingSeatEntity extends AbstractAuditingEntity {
     @Column(name = "BOOKING_ID", nullable = false)
     private String bookingId;
 
-    @Column(name = "ROUTE_ID", nullable = false)
-    private String routeId;
+    @Column(name = "TRIP_ID", nullable = false)
+    private String tripId;
 
     @Column(name = "SEAT_NO")
     private String seatNo;

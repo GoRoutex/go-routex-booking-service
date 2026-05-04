@@ -2,8 +2,6 @@ package vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.route.r
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.route.entity.RouteEntity;
 
@@ -16,10 +14,4 @@ public interface RouteEntityRepository extends JpaRepository<RouteEntity, String
     Optional<RouteEntity> findByIdAndMerchantId(String id, String merchantId);
 
     List<RouteEntity> findByMerchantId(String merchantId);
-
-    @Query(value = """
-            SELECT generate_route_code(:origin, :destination)
-            """, nativeQuery = true)
-    String generateRouteCode(@Param("origin") String origin,
-                             @Param("destination") String destination);
 }

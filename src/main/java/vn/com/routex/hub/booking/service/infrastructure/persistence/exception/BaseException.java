@@ -3,7 +3,7 @@ package vn.com.routex.hub.booking.service.infrastructure.persistence.exception;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import vn.com.routex.hub.booking.service.controller.models.result.ApiResult;
+import vn.com.routex.hub.booking.service.interfaces.models.result.ApiResult;
 
 @Data
 @Builder(toBuilder = true)

@@ -15,10 +15,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
-import vn.com.routex.hub.booking.service.controller.models.base.BaseRequest;
-import vn.com.routex.hub.booking.service.controller.models.base.BaseResponse;
-import vn.com.routex.hub.booking.service.controller.models.result.ApiResult;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.ApiRequestUtils;
+import vn.com.routex.hub.booking.service.interfaces.models.base.BaseRequest;
+import vn.com.routex.hub.booking.service.interfaces.models.base.BaseResponse;
+import vn.com.routex.hub.booking.service.interfaces.models.result.ApiResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,6 +85,17 @@ public class ExceptionHandlerAdvice {
                                 .build()
                 ));
     }
+
+    @ExceptionHandler(CustomFeignException.class)
+    public ResponseEntity<BaseResponse<Void>> handleCustomFeignException(HttpServletRequest request, CustomFeignException ex) {
+        BaseRequest baseRequest = logAndGetBaseRequest(request, ex);
+
+        if (TIMEOUT_ERROR.equals(ex.getResult().getResponseCode())) {
+            return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(buildBaseResponse(baseRequest, ex.getResult()));
+        }
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(buildBaseResponse(baseRequest, ex.getResult()));
+    }
+
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<BaseResponse<Void>> handleBusinessException(HttpServletRequest request, BusinessException ex) {
         BaseRequest baseRequest = logAndGetBaseRequest(request, ex);
@@ -118,6 +129,7 @@ public class ExceptionHandlerAdvice {
         }
         return responseCode;
     }
+
     private static String getFieldNameResponse(String fieldNameFullPath) {
         if (!fieldNameFullPath.contains(".")) {
             return fieldNameFullPath;

@@ -1,5 +1,8 @@
 package vn.com.routex.hub.booking.service.infrastructure.persistence.constant;
 
+import java.math.BigDecimal;
+import java.time.ZoneId;
+
 public class  ApplicationConstant {
 
     public static final String REQUEST_ID_REGREX = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
@@ -15,5 +18,9 @@ public class  ApplicationConstant {
     public static final String HOUR_MINUTES_REGEX = "^([01]\\d|2[0-3]):([0-5]\\d)$";
     public static final String YEAR_MONTH_DATE_REGEX = "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$";
 
+    public static final int DEFAULT_PAGE_SIZE = 10;
+    public static final int DEFAULT_PAGE_NUMBER = 1;
+    public static final ZoneId DEFAULT_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
+    public static final BigDecimal DEFAULT_MERCHANT_COMMISSION_RATE = new BigDecimal("15.00");
 
 }

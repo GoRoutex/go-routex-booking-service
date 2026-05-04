@@ -2,7 +2,7 @@ package vn.com.routex.hub.booking.service.infrastructure.persistence.utils;
 
 
 import lombok.experimental.UtilityClass;
-import vn.com.routex.hub.booking.service.controller.models.result.ApiResult;
+import vn.com.routex.hub.booking.service.interfaces.models.result.ApiResult;
 
 @UtilityClass
 public class ExceptionUtils {

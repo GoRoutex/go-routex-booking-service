@@ -30,14 +30,14 @@ spring:
         max.poll.records: 500
 
     events:
-      route-ready-for-sale: "routex.route.ready-for-sale"
+      trip-ready-for-sale: "routex.trip.ready-for-sale"
+      trip-assigned: "routex.trip.assigned"
       booking-created: "routex.booking.created"
       booking-confirmed: "routex.booking.confirmed"
       booking-cancelled: "routex.booking.cancelled"
       booking-failed: "routex.booking.failed"
       ticket-issued: "routex.ticket.issued"
-      payment-initiated: "routex.payment.initiated"
-      payment-completed: "routex.payment.completed"
+      payment-succeeded: "routex.payment.succeeded"
       payment-failed: "routex.payment.failed"
       payment-refunded: "routex.payment.refunded"
       seat-reserved: "routex.seat.reserved"
@@ -48,17 +48,20 @@ spring:
       notification-activities: "routex.notification.activities"
 
     topics:
+      trips: "trip.management.event"
       routes: "route.management.event"
       booking: "route.bookings.event"
-      payment-success: "payment.success.event.management"
-      payment-failed: "payment.failed.event.management"
+      payments: "route.payments.event"
       seats: "seat.event.management"
       notifications: "notification.event.management"
       dead-letter: "bus-dead-letter-queue"
 
     group-id:
+      trips: "trip-service"
       bookings: "booking-service"
       payments: "payment-service"
+      payment-succeeded: "booking-service-payment-succeeded"
+      payment-failed: "booking-service-payment-failed"
       routes: "routes-service"
 
     listener:
@@ -117,6 +120,17 @@ identity:
 
 logging:
   level:
-    org.springframework.security: DEBUG
+    org.springframework: WARN
     org.springframework.kafka: INFO
     org.apache.kafka: WARN
+    root: INFO
+
+booking:
+  hold-expiration:
+    fixed-delay-ms: ${BOOKING_HOLD_EXPIRATION_FIXED_DELAY_MS:15000}
+    initial-delay-ms: ${BOOKING_HOLD_EXPIRATION_INITIAL_DELAY_MS:15000}
+    batch-size: ${BOOKING_HOLD_EXPIRATION_BATCH_SIZE:100}
+
+clients:
+  payment-service:
+    base-url: ${PAYMENT_SERVICE_BASE_URL:http://localhost:8086}
