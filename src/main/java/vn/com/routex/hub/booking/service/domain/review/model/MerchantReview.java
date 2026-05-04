@@ -20,8 +20,8 @@ public class MerchantReview extends AbstractAuditingEntity {
     private String merchantId;
     private ReviewType reviewType;
     private String bookingId;
-    private String routeId;
-    private String routeCode;
+    private String tripId;
+    private String tripCode;
     private String driverId;
     private String vehicleId;
     private String customerId;
@@ -43,8 +43,8 @@ public class MerchantReview extends AbstractAuditingEntity {
             String merchantId,
             ReviewType reviewType,
             String bookingId,
-            String routeId,
-            String routeCode,
+            String tripId,
+            String tripCode,
             String driverId,
             String vehicleId,
             String customerId,
@@ -68,8 +68,8 @@ public class MerchantReview extends AbstractAuditingEntity {
                 .merchantId(merchantId)
                 .reviewType(reviewType)
                 .bookingId(bookingId)
-                .routeId(routeId)
-                .routeCode(routeCode)
+                .tripId(tripId)
+                .tripCode(tripCode)
                 .driverId(driverId)
                 .vehicleId(vehicleId)
                 .customerId(customerId)

@@ -47,7 +47,7 @@ public class HoldSeatRequest extends BaseRequest {
     public static class HoldSeatRequestData {
         @NotBlank
         @NotNull
-        private String routeId;
+        private String tripId;
 
         @NotEmpty
         private List<String> seatNos;

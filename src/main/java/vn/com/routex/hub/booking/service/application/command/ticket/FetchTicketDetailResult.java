@@ -12,7 +12,7 @@ public record FetchTicketDetailResult(
         String ticketCode,
         String bookingId,
         String bookingSeatId,
-        String routeId,
+        String tripId,
         String seatNumber,
         String customerName,
         String customerPhone,

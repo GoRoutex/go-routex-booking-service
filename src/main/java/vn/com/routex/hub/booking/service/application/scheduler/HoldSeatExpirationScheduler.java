@@ -15,8 +15,8 @@ import vn.com.routex.hub.booking.service.domain.booking.port.BookingRepositoryPo
 import vn.com.routex.hub.booking.service.domain.booking.port.BookingSeatRepositoryPort;
 import vn.com.routex.hub.booking.service.domain.paymentcontext.port.PaymentContextQueryPort;
 import vn.com.routex.hub.booking.service.domain.seat.SeatStatus;
-import vn.com.routex.hub.booking.service.domain.seat.model.RouteSeat;
-import vn.com.routex.hub.booking.service.domain.seat.port.RouteSeatRepositoryPort;
+import vn.com.routex.hub.booking.service.domain.seat.model.TripSeat;
+import vn.com.routex.hub.booking.service.domain.seat.port.TripSeatRepositoryPort;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -31,7 +31,7 @@ public class HoldSeatExpirationScheduler {
 
     private final BookingRepositoryPort bookingRepositoryPort;
     private final BookingSeatRepositoryPort bookingSeatRepositoryPort;
-    private final RouteSeatRepositoryPort routeSeatRepositoryPort;
+    private final TripSeatRepositoryPort tripSeatRepositoryPort;
     private final PaymentContextQueryPort paymentContextQueryPort;
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
@@ -74,19 +74,19 @@ public class HoldSeatExpirationScheduler {
                     .map(BookingSeat::getSeatNo)
                     .toList();
 
-            List<RouteSeat> routeSeats = routeSeatRepositoryPort.findAllByRouteIdAndSeatNoInForUpdate(booking.getRouteId(), seatNos);
-            routeSeats.forEach(routeSeat -> {
+            List<TripSeat> tripSeats = tripSeatRepositoryPort.findAllByTripIdAndSeatNoInForUpdate(booking.getTripId(), seatNos);
+            tripSeats.forEach(routeSeat -> {
                 if (routeSeat.getStatus() == SeatStatus.HELD) {
                     routeSeat.setStatus(SeatStatus.AVAILABLE);
                 }
             });
-            routeSeatRepositoryPort.saveAll(routeSeats);
+            tripSeatRepositoryPort.saveAll(tripSeats);
 
             List<BookingSeat> expiredSeats = bookingSeats.stream()
                     .map(bookingSeat -> BookingSeat.builder()
                             .id(bookingSeat.getId())
                             .bookingId(bookingSeat.getBookingId())
-                            .routeId(bookingSeat.getRouteId())
+                            .tripId(bookingSeat.getTripId())
                             .seatNo(bookingSeat.getSeatNo())
                             .price(bookingSeat.getPrice())
                             .status(BookingSeatStatus.EXPIRED)

@@ -1,16 +1,16 @@
 package vn.com.routex.hub.booking.service.infrastructure.persistence.adapter.route;
 
 import org.springframework.stereotype.Component;
-import vn.com.routex.hub.booking.service.domain.route.model.RouteAssignmentRecord;
-import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.assignment.entity.RouteAssignmentEntity;
+import vn.com.routex.hub.booking.service.domain.route.model.TripAssignmentRecord;
+import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.assignment.entity.TripAssignmentEntity;
 
 @Component
-public class RouteAssignmentPersistenceMapper {
+public class TripAssignmentPersistenceMapper {
 
-    public RouteAssignmentRecord toDomain(RouteAssignmentEntity entity) {
-        return RouteAssignmentRecord.builder()
+    public TripAssignmentRecord toDomain(TripAssignmentEntity entity) {
+        return TripAssignmentRecord.builder()
                 .id(entity.getId())
-                .routeId(entity.getRouteId())
+                .tripId(entity.getTripId())
                 .creator(entity.getCreator())
                 .merchantId(entity.getMerchantId())
                 .vehicleId(entity.getVehicleId())
@@ -24,10 +24,10 @@ public class RouteAssignmentPersistenceMapper {
                 .build();
     }
 
-    public RouteAssignmentEntity toJpaEntity(RouteAssignmentRecord record) {
-        return RouteAssignmentEntity.builder()
+    public TripAssignmentEntity toJpaEntity(TripAssignmentRecord record) {
+        return TripAssignmentEntity.builder()
                 .id(record.getId())
-                .routeId(record.getRouteId())
+                .tripId(record.getTripId())
                 .creator(record.getCreator())
                 .merchantId(record.getMerchantId())
                 .driverId(record.getDriverId())

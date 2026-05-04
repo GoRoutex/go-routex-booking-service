@@ -38,11 +38,11 @@ public class MerchantReviewEntity extends AbstractAuditingEntity {
     @Column(name = "BOOKING_ID")
     private String bookingId;
 
-    @Column(name = "ROUTE_ID")
-    private String routeId;
+    @Column(name = "TRIP_ID")
+    private String tripId;
 
-    @Column(name = "ROUTE_CODE")
-    private String routeCode;
+    @Column(name = "TRIP_CODE")
+    private String tripCode;
 
     @Column(name = "DRIVER_ID")
     private String driverId;

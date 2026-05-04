@@ -5,24 +5,24 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import vn.com.go.routex.identity.security.log.SystemLog;
-import vn.com.routex.hub.booking.service.application.handler.RouteEvent;
-import vn.com.routex.hub.booking.service.interfaces.models.base.BaseRequest;
+import vn.com.routex.hub.booking.service.application.handler.TripEvent;
 import vn.com.routex.hub.booking.service.domain.seat.SeatFloor;
 import vn.com.routex.hub.booking.service.domain.seat.SeatStatus;
-import vn.com.routex.hub.booking.service.domain.seat.model.RouteSeat;
 import vn.com.routex.hub.booking.service.domain.seat.model.SeatTemplate;
-import vn.com.routex.hub.booking.service.domain.seat.port.RouteSeatRepositoryPort;
+import vn.com.routex.hub.booking.service.domain.seat.model.TripSeat;
 import vn.com.routex.hub.booking.service.domain.seat.port.SeatTemplateRepositoryPort;
+import vn.com.routex.hub.booking.service.domain.seat.port.TripSeatRepositoryPort;
 import vn.com.routex.hub.booking.service.domain.vehicle.model.VehicleProfile;
 import vn.com.routex.hub.booking.service.domain.vehicle.model.VehicleTemplate;
 import vn.com.routex.hub.booking.service.domain.vehicle.port.VehicleRepositoryPort;
 import vn.com.routex.hub.booking.service.domain.vehicle.port.VehicleTemplateRepositoryPort;
-import vn.com.routex.hub.booking.service.infrastructure.cache.redis.models.RouteCacheSeat;
+import vn.com.routex.hub.booking.service.infrastructure.cache.redis.models.TripCacheSeat;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.event.DomainEvent;
-import vn.com.routex.hub.booking.service.infrastructure.kafka.event.RouteSeatGeneratedEvent;
-import vn.com.routex.hub.booking.service.infrastructure.kafka.event.RouteSellableEvent;
+import vn.com.routex.hub.booking.service.infrastructure.kafka.event.TripSeatGeneratedEvent;
+import vn.com.routex.hub.booking.service.infrastructure.kafka.event.TripSellableEvent;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.exception.BusinessException;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.ExceptionUtils;
+import vn.com.routex.hub.booking.service.interfaces.models.base.BaseRequest;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -41,10 +41,10 @@ import static vn.com.routex.hub.booking.service.infrastructure.persistence.const
 
 @Component
 @RequiredArgsConstructor
-public class RouteEventHandler implements RouteEvent {
+public class TripEventHandler implements TripEvent {
 
     private final VehicleRepositoryPort vehicleRepositoryPort;
-    private final RouteSeatRepositoryPort routeSeatRepositoryPort;
+    private final TripSeatRepositoryPort tripSeatRepositoryPort;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final VehicleTemplateRepositoryPort vehicleTemplateRepositoryPort;
     private final SeatTemplateRepositoryPort seatTemplateRepositoryPort;
@@ -53,7 +53,7 @@ public class RouteEventHandler implements RouteEvent {
 
     @Override
     @Transactional
-    public void generateRouteSeat(DomainEvent event, BaseRequest context, RouteSellableEvent payload) {
+    public void generateRouteSeat(DomainEvent event, BaseRequest context, TripSellableEvent payload) {
         VehicleProfile vehicle = vehicleRepositoryPort.findById(payload.vehicleId())
                 .orElseThrow(() -> new BusinessException(context.getRequestId(), context.getRequestDateTime(), context.getChannel(),
                         ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, VEHICLE_NOT_FOUND)));
@@ -61,22 +61,22 @@ public class RouteEventHandler implements RouteEvent {
         VehicleTemplate template = vehicleTemplateRepositoryPort.findById(vehicle.getTemplateId())
                 .orElseThrow(() -> new BusinessException(ExceptionUtils.buildResultResponse(VEHICLE_NOT_FOUND, VEHICLE_TEMPLATE_NOT_FOUND)));
 
-        if (routeSeatRepositoryPort.existsByRouteId(payload.routeId())) {
+        if (tripSeatRepositoryPort.existsByTripId(payload.tripId())) {
             throw new BusinessException(context.getRequestId(), context.getRequestDateTime(), context.getChannel(),
-                    ExceptionUtils.buildResultResponse(DUPLICATE_ERROR, String.format(ROUTE_SEAT_EXIST, payload.routeId())));
+                    ExceptionUtils.buildResultResponse(DUPLICATE_ERROR, String.format(ROUTE_SEAT_EXIST, payload.tripId())));
         }
 
-        sLog.info("[ROUTE-SEAT] Generate seats routeId={} vehicleId={} seatCapacity={} hasFloor={}",
-                payload.routeId(), payload.vehicleId(), template.getSeatCapacity(), template.isHasFloor());
+        sLog.info("[TRIP-SEAT] Generate seats tripId={} vehicleId={} seatCapacity={} hasFloor={}",
+                payload.tripId(), payload.vehicleId(), template.getSeatCapacity(), template.isHasFloor());
 
         List<SeatTemplate> seatTemplates = generateSeatNos(vehicle, template);
         Map<String, SeatTemplate> templateMap = seatTemplates.stream()
                 .collect(Collectors.toMap(SeatTemplate::getId, Function.identity()));
 
-        List<RouteSeat> seats = seatTemplates.stream()
-                .map(seatTemplate -> RouteSeat.builder()
+        List<TripSeat> seats = seatTemplates.stream()
+                .map(seatTemplate -> TripSeat.builder()
                         .id(UUID.randomUUID().toString())
-                        .routeId(payload.routeId())
+                        .tripId(payload.tripId())
                         .seatNo(seatTemplate.getSeatCode())
                         .status(SeatStatus.AVAILABLE)
                         .seatTemplateId(seatTemplate.getId())
@@ -86,13 +86,13 @@ public class RouteEventHandler implements RouteEvent {
                         .build())
                 .collect(Collectors.toList());
 
-        List<RouteSeat> savedSeats = routeSeatRepositoryPort.saveAll(seats);
+        List<TripSeat> savedSeats = tripSeatRepositoryPort.saveAll(seats);
 
-        List<RouteCacheSeat> cacheData = savedSeats.stream()
+        List<TripCacheSeat> cacheData = savedSeats.stream()
                 .map(seat -> {
                     SeatTemplate seatTemplate = templateMap.get(seat.getSeatTemplateId());
-                    return RouteCacheSeat.builder()
-                            .routeId(seat.getRouteId())
+                    return TripCacheSeat.builder()
+                            .tripId(seat.getTripId())
                             .seatId(seat.getId())
                             .seatNo(seat.getSeatNo())
                             .status(seat.getStatus())
@@ -104,7 +104,7 @@ public class RouteEventHandler implements RouteEvent {
                 .toList();
 
         sLog.info("[ROUTE-CACHE] Route Seat Cache Data: {}", cacheData);
-        applicationEventPublisher.publishEvent(new RouteSeatGeneratedEvent(payload.routeId(), cacheData));
+        applicationEventPublisher.publishEvent(new TripSeatGeneratedEvent(payload.tripId(), cacheData));
     }
 
     private List<SeatTemplate> generateSeatNos(VehicleProfile vehicle, VehicleTemplate template) {

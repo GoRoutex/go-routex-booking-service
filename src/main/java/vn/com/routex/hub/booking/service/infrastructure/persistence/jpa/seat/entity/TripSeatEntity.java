@@ -20,14 +20,14 @@ import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.entity.A
 @NoArgsConstructor
 @SuperBuilder
 @Entity
-@Table(name = "ROUTE_SEAT")
-public class RouteSeatEntity extends AbstractAuditingEntity {
+@Table(name = "TRIP_SEAT")
+public class TripSeatEntity extends AbstractAuditingEntity {
 
     @Id
     private String id;
 
-    @Column(name = "ROUTE_ID")
-    private String routeId;
+    @Column(name = "TRIP_ID")
+    private String tripId;
 
     @Column(name = "SEAT_NO")
     private String seatNo;

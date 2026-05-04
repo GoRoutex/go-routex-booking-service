@@ -21,7 +21,7 @@ public class Ticket extends AbstractAuditingEntity {
     private String ticketCode;
     private String bookingId;
     private String bookingSeatId;
-    private String routeId;
+    private String tripId;
     private String vehicleId;
     private String seatNumber;
     private String customerName;

@@ -38,7 +38,7 @@ public class HoldSeatResponse extends BaseResponse<List<HoldSeatResponse.HoldSea
     @NoArgsConstructor
     @SuperBuilder
     public static class HoldSeatResponseData {
-        private String routeId;
+        private String tripId;
         private String seatNo;
         private String status;
         private String holdToken;

@@ -17,13 +17,13 @@ import vn.com.routex.hub.booking.service.application.command.ticket.FetchTicketD
 import vn.com.routex.hub.booking.service.application.command.ticket.FetchTicketsQuery;
 import vn.com.routex.hub.booking.service.application.command.ticket.FetchTicketsResult;
 import vn.com.routex.hub.booking.service.application.services.TicketQueryService;
+import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.HttpUtils;
 import vn.com.routex.hub.booking.service.interfaces.models.base.BaseRequest;
 import vn.com.routex.hub.booking.service.interfaces.models.result.ApiResult;
 import vn.com.routex.hub.booking.service.interfaces.models.ticket.FetchTicketDetailRequest;
 import vn.com.routex.hub.booking.service.interfaces.models.ticket.FetchTicketDetailResponse;
 import vn.com.routex.hub.booking.service.interfaces.models.ticket.FetchTicketsRequest;
 import vn.com.routex.hub.booking.service.interfaces.models.ticket.FetchTicketsResponse;
-import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.HttpUtils;
 
 import java.util.List;
 
@@ -63,7 +63,7 @@ public class BookingManagementController {
                         item.ticketCode(),
                         item.bookingId(),
                         item.bookingSeatId(),
-                        item.routeId(),
+                        item.tripId(),
                         item.seatNumber(),
                         item.customerName(),
                         item.customerPhone(),
@@ -103,7 +103,7 @@ public class BookingManagementController {
                         .ticketCode(result.ticketCode())
                         .bookingId(result.bookingId())
                         .bookingSeatId(result.bookingSeatId())
-                        .routeId(result.routeId())
+                        .tripId(result.tripId())
                         .seatNumber(result.seatNumber())
                         .customerName(result.customerName())
                         .customerPhone(result.customerPhone())

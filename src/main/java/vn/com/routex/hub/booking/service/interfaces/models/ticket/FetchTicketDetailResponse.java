@@ -4,8 +4,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import vn.com.routex.hub.booking.service.interfaces.models.base.BaseResponse;
 import vn.com.routex.hub.booking.service.domain.ticket.TicketStatus;
+import vn.com.routex.hub.booking.service.interfaces.models.base.BaseResponse;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -25,7 +25,7 @@ public class FetchTicketDetailResponse extends BaseResponse<FetchTicketDetailRes
         private String ticketCode;
         private String bookingId;
         private String bookingSeatId;
-        private String routeId;
+        private String tripId;
         private String seatNumber;
         private String customerName;
         private String customerPhone;

@@ -8,15 +8,15 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 import vn.com.go.routex.identity.security.log.SystemLog;
-import vn.com.routex.hub.booking.service.application.handler.impl.RouteEventHandler;
-import vn.com.routex.hub.booking.service.interfaces.models.base.BaseRequest;
+import vn.com.routex.hub.booking.service.application.handler.impl.TripEventHandler;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.config.KafkaEventPublisher;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.event.DomainEvent;
-import vn.com.routex.hub.booking.service.infrastructure.kafka.event.RouteOpenForBookingEvent;
-import vn.com.routex.hub.booking.service.infrastructure.kafka.event.RouteSellableEvent;
+import vn.com.routex.hub.booking.service.infrastructure.kafka.event.TripOpenForBookingEvent;
+import vn.com.routex.hub.booking.service.infrastructure.kafka.event.TripSellableEvent;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.exception.BusinessException;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.ExceptionUtils;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.JsonUtils;
+import vn.com.routex.hub.booking.service.interfaces.models.base.BaseRequest;
 
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.INVALID_DATA_ERROR_MESSAGE;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.INVALID_EVENT_MESSAGE;
@@ -24,10 +24,10 @@ import static vn.com.routex.hub.booking.service.infrastructure.persistence.const
 
 @Component
 @RequiredArgsConstructor
-public class RouteForSaleConsumer {
+public class TripForSaleConsumer {
 
 
-    @Value("${spring.kafka.events.route-ready-for-sale}")
+    @Value("${spring.kafka.events.trip-ready-for-sale}")
     private String routeReadyForSale;
 
     @Value("${spring.kafka.topics.notifications}")
@@ -37,15 +37,15 @@ public class RouteForSaleConsumer {
     private String notificationActivitiesEvent;
 
     private final KafkaEventPublisher kafkaEventPublisher;
-    private final RouteEventHandler routeEventHandler;
+    private final TripEventHandler tripEventHandler;
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
     @KafkaListener(
-            topics = "${spring.kafka.topics.routes}",
+            topics = "${spring.kafka.topics.trips}",
             containerFactory = "kafkaListenerContainerFactory",
-            groupId = "${spring.kafka.group-id.bookings}")
+            groupId = "${spring.kafka.group-id.trips}")
     public void consume(String payload, Acknowledgment acknowledgment) {
-        sLog.info("[ROUTE-FOR-SALE] Raw Payload: {}",  payload);
+        sLog.info("[TRIP-FOR-SALE] Raw Payload: {}",  payload);
 
         DomainEvent event =
                 JsonUtils.parseToKafkaObject(
@@ -54,7 +54,7 @@ public class RouteForSaleConsumer {
                         });
 
 
-        sLog.info("[ROUTE-FOR-SALE] Domain Event: {}", event);
+        sLog.info("[TRIP-FOR-SALE] Domain Event: {}", event);
 
 
         if (event == null
@@ -72,26 +72,26 @@ public class RouteForSaleConsumer {
         }
 
         BaseRequest context = JsonUtils.convertValue(event.header().get("context"), BaseRequest.class);
-        RouteSellableEvent routeEvent = JsonUtils.convertValue(event.payload().get("data"), RouteSellableEvent.class);
+        TripSellableEvent routeEvent = JsonUtils.convertValue(event.payload().get("data"), TripSellableEvent.class);
 
-        sLog.info("[ROUTE-EVENT] Processing event: eventName={} eventId={} aggregateId={} routeId={} vehicleId={}",
+        sLog.info("[TRIP-EVENT] Processing event: eventName={} eventId={} aggregateId={} tripId={} vehicleId={}",
                 event.eventType(),
                 event.eventId(),
                 event.aggregateId(),
-                routeEvent.routeId(),
+                routeEvent.tripId(),
                 routeEvent.vehicleId());
 
         sLog.info("[ROUTE-EVENT] Route Sellable Event: {}", routeEvent);
 
         try {
             validateEvent(event, context, routeEvent);
-            routeEventHandler.generateRouteSeat(event, context, routeEvent);
+            tripEventHandler.generateRouteSeat(event, context, routeEvent);
         } catch (Exception ex) {
             sLog.error("[ROUTE-EVENT] Failed eventName={} eventId={} aggregateId={} routeId={} vehicleId={}",
                     event.eventType(),
                     event.eventId(),
                     event.aggregateId(),
-                    routeEvent.routeId(),
+                    routeEvent.tripId(),
                     routeEvent.vehicleId(),
                     ex);
             throw ex;
@@ -99,9 +99,9 @@ public class RouteForSaleConsumer {
 
         sLog.info("[ROUTE-EVENT] Event processed successfully: eventName={} eventId={} routeId={}", event.eventType(), event.eventId(), event.aggregateId());
 
-        RouteOpenForBookingEvent bookingEvent = RouteOpenForBookingEvent
+        TripOpenForBookingEvent bookingEvent = TripOpenForBookingEvent
                 .builder()
-                .routeId(routeEvent.routeId())
+                .tripId(routeEvent.tripId())
                 .vehicleId(routeEvent.vehicleId())
                 .seatCount(routeEvent.seatCount())
                 .creator(routeEvent.creator())
@@ -112,7 +112,7 @@ public class RouteForSaleConsumer {
                 context,
                 notificationTopic,
                 notificationActivitiesEvent,
-                routeEvent.routeId(),
+                routeEvent.tripId(),
                 bookingEvent
         );
 
@@ -120,7 +120,7 @@ public class RouteForSaleConsumer {
     }
 
 
-    public void validateEvent(DomainEvent event, BaseRequest context, RouteSellableEvent data) {
+    public void validateEvent(DomainEvent event, BaseRequest context, TripSellableEvent data) {
         if (event.eventId().isBlank()
                 || event.eventType().isBlank()
                 || event.aggregateId().isBlank()
@@ -128,7 +128,7 @@ public class RouteForSaleConsumer {
                 || context.getRequestId().isBlank()
                 || context.getRequestDateTime().isBlank()
                 || context.getChannel().isBlank()
-                || data.routeId().isBlank()
+                || data.tripId().isBlank()
                 || data.vehicleId().isBlank()) {
             throw new BusinessException(ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, String.format(INVALID_EVENT_MESSAGE, event.eventType())));
         }

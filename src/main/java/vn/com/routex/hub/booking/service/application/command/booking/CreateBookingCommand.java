@@ -9,7 +9,7 @@ import java.time.OffsetDateTime;
 public record CreateBookingCommand(
         RequestContext context,
         String merchantId,
-        String routeId,
+        String tripId,
         String holdBy,
         String holdToken,
         OffsetDateTime heldAt,

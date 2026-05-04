@@ -15,6 +15,4 @@ public interface RouteAggregateRepositoryPort {
     List<RouteAggregate> findByMerchantId(String merchantId);
 
     void save(RouteAggregate aggregate);
-
-    String generateRouteCode(String originCode, String destinationCode);
 }

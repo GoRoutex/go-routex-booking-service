@@ -12,9 +12,9 @@ import vn.com.routex.hub.booking.service.domain.booking.model.Booking;
 import vn.com.routex.hub.booking.service.domain.booking.model.BookingSeat;
 import vn.com.routex.hub.booking.service.domain.booking.port.BookingRepositoryPort;
 import vn.com.routex.hub.booking.service.domain.booking.port.BookingSeatRepositoryPort;
-import vn.com.routex.hub.booking.service.domain.route.model.RouteAssignmentRecord;
-import vn.com.routex.hub.booking.service.domain.route.port.RouteAssignmentRepositoryPort;
-import vn.com.routex.hub.booking.service.domain.seat.model.RouteSeat;
+import vn.com.routex.hub.booking.service.domain.route.model.TripAssignmentRecord;
+import vn.com.routex.hub.booking.service.domain.route.port.TripAssignmentRepositoryPort;
+import vn.com.routex.hub.booking.service.domain.seat.model.TripSeat;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.exception.BusinessException;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.ExceptionUtils;
 
@@ -31,26 +31,26 @@ import static vn.com.routex.hub.booking.service.infrastructure.persistence.const
 public class BookingServiceImpl implements BookingService {
     private final BookingRepositoryPort bookingRepositoryPort;
     private final BookingSeatRepositoryPort bookingSeatRepositoryPort;
-    private final RouteAssignmentRepositoryPort routeAssignmentRepositoryPort;
+    private final TripAssignmentRepositoryPort routeAssignmentRepositoryPort;
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
     @Override
     @Transactional
-    public Booking createBooking(CreateBookingCommand command, List<RouteSeat> routeSeats) {
+    public Booking createBooking(CreateBookingCommand command, List<TripSeat> tripSeats) {
         sLog.info("[BOOK-SERVICE] Create Draft Booking Command: {}", command);
 
 
-        RouteAssignmentRecord assignmentRecord = routeAssignmentRepositoryPort.findActiveByRouteId(command.routeId())
+        TripAssignmentRecord assignmentRecord = routeAssignmentRepositoryPort.findActiveByTripId(command.tripId())
                 .orElseThrow(() -> new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
-                        ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(ASSIGNMENT_NOT_FOUND, command.routeId()))));
+                        ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(ASSIGNMENT_NOT_FOUND, command.tripId()))));
 
         BigDecimal basePrice = assignmentRecord.getTicketPrice();
-        BigDecimal totalAmount = basePrice.multiply(BigDecimal.valueOf(routeSeats.size()));
+        BigDecimal totalAmount = basePrice.multiply(BigDecimal.valueOf(tripSeats.size()));
 
         Booking booking = Booking.builder()
                 .id(UUID.randomUUID().toString())
                 .bookingCode(bookingRepositoryPort.generateBookingCode())
-                .routeId(command.routeId())
+                .tripId(command.tripId())
                 .merchantId(command.merchantId())
                 .vehicleId(assignmentRecord.getVehicleId())
                 .customerId(command.customerId())
@@ -58,7 +58,7 @@ public class BookingServiceImpl implements BookingService {
                 .customerPhone(command.customerPhone())
                 .customerEmail(command.customerEmail())
                 .channel(command.context().channel())
-                .seatCount(routeSeats.size())
+                .seatCount(tripSeats.size())
                 .totalAmount(totalAmount)
                 .currency("VND")
                 .status(BookingStatus.PENDING_PAYMENT)
@@ -67,11 +67,11 @@ public class BookingServiceImpl implements BookingService {
                 .creator(command.holdBy())
                 .build();
 
-        List<BookingSeat> bookingSeats = routeSeats.stream()
+        List<BookingSeat> bookingSeats = tripSeats.stream()
                 .map(seat -> BookingSeat.builder()
                         .id(UUID.randomUUID().toString())
                         .bookingId(booking.getId())
-                        .routeId(command.routeId())
+                        .tripId(command.tripId())
                         .seatNo(seat.getSeatNo())
                         .creator(command.holdBy())
                         .status(BookingSeatStatus.HELD)

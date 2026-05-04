@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import vn.com.routex.hub.booking.service.domain.assignment.RouteAssignmentStatus;
+import vn.com.routex.hub.booking.service.domain.assignment.TripAssignmentStatus;
 import vn.com.routex.hub.booking.service.domain.auditing.AbstractAuditingEntity;
 
 import java.math.BigDecimal;
@@ -16,43 +16,43 @@ import java.time.OffsetDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder(toBuilder = true)
-public class RouteAssignmentRecord extends AbstractAuditingEntity {
+public class TripAssignmentRecord extends AbstractAuditingEntity {
     private String id;
     private String merchantId;
-    private String routeId;
+    private String tripId;
     private String creator;
     private String vehicleId;
     private String driverId;
     private BigDecimal ticketPrice;
     private OffsetDateTime assignedAt;
     private OffsetDateTime unAssignedAt;
-    private RouteAssignmentStatus status;
-    public static RouteAssignmentRecord assign(
+    private TripAssignmentStatus status;
+    public static TripAssignmentRecord assign(
             String id,
             String merchantId,
-            String routeId,
+            String tripId,
             String creator,
             String vehicleId,
             String driverId,
             BigDecimal ticketPrice,
             OffsetDateTime assignedAt
     ) {
-        return RouteAssignmentRecord.builder()
+        return TripAssignmentRecord.builder()
                 .id(id)
-                .routeId(routeId)
+                .tripId(tripId)
                 .creator(creator)
                 .merchantId(merchantId)
                 .driverId(driverId)
                 .vehicleId(vehicleId)
                 .assignedAt(assignedAt)
                 .ticketPrice(ticketPrice)
-                .status(RouteAssignmentStatus.PENDING_ASSIGNMENT)
+                .status(TripAssignmentStatus.PENDING_ASSIGNMENT)
                 .build();
     }
 
 
     public void cancel(String actor, OffsetDateTime at) {
-        this.status = RouteAssignmentStatus.CANCELED;
+        this.status = TripAssignmentStatus.CANCELED;
         this.unAssignedAt = at;
         this.setUpdatedAt(at);
         this.setUpdatedBy(actor);

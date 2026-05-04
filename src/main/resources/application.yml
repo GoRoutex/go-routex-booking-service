@@ -30,7 +30,8 @@ spring:
         max.poll.records: 500
 
     events:
-      route-ready-for-sale: "routex.route.ready-for-sale"
+      trip-ready-for-sale: "routex.trip.ready-for-sale"
+      trip-assigned: "routex.trip.assigned"
       booking-created: "routex.booking.created"
       booking-confirmed: "routex.booking.confirmed"
       booking-cancelled: "routex.booking.cancelled"
@@ -47,6 +48,7 @@ spring:
       notification-activities: "routex.notification.activities"
 
     topics:
+      trips: "trip.management.event"
       routes: "route.management.event"
       booking: "route.bookings.event"
       payments: "route.payments.event"
@@ -55,6 +57,7 @@ spring:
       dead-letter: "bus-dead-letter-queue"
 
     group-id:
+      trips: "trip-service"
       bookings: "booking-service"
       payments: "payment-service"
       payment-succeeded: "booking-service-payment-succeeded"

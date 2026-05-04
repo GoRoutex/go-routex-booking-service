@@ -18,9 +18,9 @@ import vn.com.routex.hub.booking.service.domain.seat.SeatStatus;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder(toBuilder = true)
-public class RouteSeat extends AbstractAuditingEntity {
+public class TripSeat extends AbstractAuditingEntity {
     private String id;
-    private String routeId;
+    private String tripId;
     private String seatNo;
     private SeatStatus status;
     private String creator;

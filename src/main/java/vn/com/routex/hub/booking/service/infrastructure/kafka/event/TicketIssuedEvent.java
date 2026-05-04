@@ -15,7 +15,7 @@ public record TicketIssuedEvent(
         String customerName,
         String customerPhone,
         String customerEmail,
-        String routeId,
+        String tripId,
         BigDecimal totalAmount,
         String currency,
         OffsetDateTime paidAt,

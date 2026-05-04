@@ -22,7 +22,7 @@ public class BookingRepositoryAdapter implements BookingRepositoryPort {
     @Override
     public Booking save(Booking booking) {
         return bookingPersistenceMapper.toDomain(
-                bookingEntityRepository.save(bookingPersistenceMapper.toJpaEntity(booking))
+                bookingEntityRepository.save(bookingPersistenceMapper.toEntity(booking))
         );
     }
 

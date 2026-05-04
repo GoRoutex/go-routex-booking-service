@@ -13,8 +13,8 @@ import vn.com.routex.hub.booking.service.domain.booking.model.BookingSeat;
 import vn.com.routex.hub.booking.service.domain.booking.port.BookingRepositoryPort;
 import vn.com.routex.hub.booking.service.domain.booking.port.BookingSeatRepositoryPort;
 import vn.com.routex.hub.booking.service.domain.seat.SeatStatus;
-import vn.com.routex.hub.booking.service.domain.seat.model.RouteSeat;
-import vn.com.routex.hub.booking.service.domain.seat.port.RouteSeatRepositoryPort;
+import vn.com.routex.hub.booking.service.domain.seat.model.TripSeat;
+import vn.com.routex.hub.booking.service.domain.seat.port.TripSeatRepositoryPort;
 import vn.com.routex.hub.booking.service.domain.ticket.TicketStatus;
 import vn.com.routex.hub.booking.service.domain.ticket.model.Ticket;
 import vn.com.routex.hub.booking.service.domain.ticket.port.TicketRepositoryPort;
@@ -40,7 +40,7 @@ import static vn.com.routex.hub.booking.service.infrastructure.persistence.const
 public class PaymentEventHandler implements PaymentEvent {
 
     private final BookingRepositoryPort bookingRepositoryPort;
-    private final RouteSeatRepositoryPort routeSeatRepositoryPort;
+    private final TripSeatRepositoryPort tripSeatRepositoryPort;
     private final BookingSeatRepositoryPort bookingSeatRepositoryPort;
     private final TicketRepositoryPort ticketRepositoryPort;
     private final KafkaEventPublisher kafkaEventPublisher;
@@ -75,7 +75,7 @@ public class PaymentEventHandler implements PaymentEvent {
         }
 
         OffsetDateTime paidAt = payload.paidAt() != null ? payload.paidAt() : OffsetDateTime.now();
-        aggregate.routeSeats().forEach(routeSeat -> routeSeat.setStatus(SeatStatus.SOLD));
+        aggregate.tripSeats().forEach(routeSeat -> routeSeat.setStatus(SeatStatus.SOLD));
         List<Ticket> issuedTickets = createTickets(aggregate, paidAt);
         List<BookingSeat> reservedSeats = attachIssuedTickets(aggregate.bookingSeats(), issuedTickets);
         aggregate.booking().setStatus(BookingStatus.CONFIRMED);
@@ -100,7 +100,7 @@ public class PaymentEventHandler implements PaymentEvent {
             return;
         }
 
-        aggregate.routeSeats().forEach(routeSeat -> routeSeat.setStatus(SeatStatus.AVAILABLE));
+        aggregate.tripSeats().forEach(routeSeat -> routeSeat.setStatus(SeatStatus.AVAILABLE));
         List<BookingSeat> cancelledSeats = aggregate.bookingSeats().stream()
                 .map(this::toCancelledBookingSeat)
                 .toList();
@@ -128,15 +128,15 @@ public class PaymentEventHandler implements PaymentEvent {
             );
         }
 
-        List<RouteSeat> routeSeats = bookingSeats.stream()
-                .map(bookingSeat -> routeSeatRepositoryPort.findByRouteIdAndSeatNo(bookingSeat.getRouteId(), bookingSeat.getSeatNo())
+        List<TripSeat> tripSeats = bookingSeats.stream()
+                .map(bookingSeat -> tripSeatRepositoryPort.findByTripIdAndSeatNo(bookingSeat.getTripId(), bookingSeat.getSeatNo())
                         .orElseThrow(() -> new BusinessException(
                                 requestId, requestDateTime, channel,
                                 ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, "Route Seat not found")
                         )))
                 .toList();
 
-        return new BookingAggregate(booking, bookingSeats, routeSeats);
+        return new BookingAggregate(booking, bookingSeats, tripSeats);
     }
 
     private List<Ticket> createTickets(BookingAggregate aggregate, OffsetDateTime paidAt) {
@@ -149,7 +149,7 @@ public class PaymentEventHandler implements PaymentEvent {
                         .bookingId(aggregate.booking().getId())
                         .bookingSeatId(bookingSeat.getId())
                         .vehicleId(aggregate.booking().getVehicleId())
-                        .routeId(bookingSeat.getRouteId())
+                        .tripId(bookingSeat.getTripId())
                         .seatNumber(bookingSeat.getSeatNo())
                         .customerName(aggregate.booking().getCustomerName())
                         .customerPhone(aggregate.booking().getCustomerPhone())
@@ -176,7 +176,7 @@ public class PaymentEventHandler implements PaymentEvent {
                     return BookingSeat.builder()
                             .id(bookingSeat.getId())
                             .bookingId(bookingSeat.getBookingId())
-                            .routeId(bookingSeat.getRouteId())
+                            .tripId(bookingSeat.getTripId())
                             .seatNo(bookingSeat.getSeatNo())
                             .price(bookingSeat.getPrice())
                             .status(BookingSeatStatus.RESERVED)
@@ -191,7 +191,7 @@ public class PaymentEventHandler implements PaymentEvent {
         return BookingSeat.builder()
                 .id(bookingSeat.getId())
                 .bookingId(bookingSeat.getBookingId())
-                .routeId(bookingSeat.getRouteId())
+                .tripId(bookingSeat.getTripId())
                 .seatNo(bookingSeat.getSeatNo())
                 .price(bookingSeat.getPrice())
                 .status(BookingSeatStatus.CANCELLED)
@@ -201,7 +201,7 @@ public class PaymentEventHandler implements PaymentEvent {
     }
 
     private void saveAggregate(BookingAggregate aggregate, List<BookingSeat> bookingSeats, List<Ticket> tickets) {
-        routeSeatRepositoryPort.saveAll(aggregate.routeSeats());
+        tripSeatRepositoryPort.saveAll(aggregate.tripSeats());
         if (!tickets.isEmpty()) {
             ticketRepositoryPort.saveAll(tickets);
         }
@@ -220,7 +220,7 @@ public class PaymentEventHandler implements PaymentEvent {
                 .customerName(aggregate.booking().getCustomerName())
                 .customerPhone(aggregate.booking().getCustomerPhone())
                 .customerEmail(aggregate.booking().getCustomerEmail())
-                .routeId(aggregate.booking().getRouteId())
+                .tripId(aggregate.booking().getTripId())
                 .totalAmount(aggregate.booking().getTotalAmount())
                 .currency(aggregate.booking().getCurrency())
                 .paidAt(paidAt)

@@ -13,7 +13,7 @@ public class BookingPersistenceMapper {
         return Booking.builder()
                 .id(entity.getId())
                 .bookingCode(entity.getBookingCode())
-                .routeId(entity.getRouteId())
+                .tripId(entity.getTripId())
                 .merchantId(entity.getMerchantId())
                 .vehicleId(entity.getVehicleId())
                 .customerId(entity.getCustomerId())
@@ -33,11 +33,11 @@ public class BookingPersistenceMapper {
                 .build();
     }
 
-    public BookingEntity toJpaEntity(Booking booking) {
+    public BookingEntity toEntity(Booking booking) {
         return BookingEntity.builder()
                 .id(booking.getId())
                 .bookingCode(booking.getBookingCode())
-                .routeId(booking.getRouteId())
+                .tripId(booking.getTripId())
                 .merchantId(booking.getMerchantId())
                 .vehicleId(booking.getVehicleId())
                 .customerId(booking.getCustomerId())
@@ -61,7 +61,7 @@ public class BookingPersistenceMapper {
         return BookingSeat.builder()
                 .id(entity.getId())
                 .bookingId(entity.getBookingId())
-                .routeId(entity.getRouteId())
+                .tripId(entity.getTripId())
                 .seatNo(entity.getSeatNo())
                 .price(entity.getPrice())
                 .status(entity.getStatus())
@@ -74,7 +74,7 @@ public class BookingPersistenceMapper {
         return BookingSeatEntity.builder()
                 .id(bookingSeat.getId())
                 .bookingId(bookingSeat.getBookingId())
-                .routeId(bookingSeat.getRouteId())
+                .tripId(bookingSeat.getTripId())
                 .seatNo(bookingSeat.getSeatNo())
                 .price(bookingSeat.getPrice())
                 .status(bookingSeat.getStatus())

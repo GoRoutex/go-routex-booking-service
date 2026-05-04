@@ -24,7 +24,7 @@ public record HoldSeatResult(
 
     @Builder
     public record HoldSeatItemResult(
-            String routeId,
+            String tripId,
             String seatNo,
             String status,
             String holdToken

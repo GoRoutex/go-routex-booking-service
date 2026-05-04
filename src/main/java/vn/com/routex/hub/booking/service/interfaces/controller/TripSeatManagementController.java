@@ -31,7 +31,7 @@ import static vn.com.routex.hub.booking.service.infrastructure.persistence.const
 @RestController
 @RequestMapping(API_PATH + API_VERSION + BOOKING_PATH)
 @RequiredArgsConstructor
-public class RouteSeatManagementController {
+public class TripSeatManagementController {
 
     private final HoldSeatService holdSeatService;
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
@@ -47,7 +47,7 @@ public class RouteSeatManagementController {
 
         HoldSeatResult result = holdSeatService.holdSeat(HoldSeatCommand.builder()
                 .context(HttpUtils.toContext(request))
-                .routeId(request.getData().getRouteId())
+                .tripId(request.getData().getTripId())
                 .seatNos(request.getData().getSeatNos())
                 .holdBy(request.getData().getHoldBy())
                 .customerName(request.getInfo().getCustomerName())
@@ -56,14 +56,12 @@ public class RouteSeatManagementController {
                 .build());
 
         List<HoldSeatResponse.HoldSeatResponseData> responseData = result.seats().stream()
-                .map(item -> {
-                    return HoldSeatResponse.HoldSeatResponseData.builder()
-                            .routeId(item.routeId())
-                            .seatNo(item.seatNo())
-                            .status(item.status())
-                            .holdToken(item.holdToken())
-                            .build();
-                })
+                .map(item -> HoldSeatResponse.HoldSeatResponseData.builder()
+                        .tripId(item.tripId())
+                        .seatNo(item.seatNo())
+                        .status(item.status())
+                        .holdToken(item.holdToken())
+                        .build())
                 .collect(Collectors.toList());
 
         HoldSeatResponse.HoldSeatResponseBookingInfo bookingInfo = getHoldSeatResponseBookingInfo(result);

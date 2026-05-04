@@ -38,8 +38,8 @@ public class TicketEntity extends AbstractAuditingEntity {
     @Column(name = "BOOKING_SEAT_ID")
     private String bookingSeatId;
 
-    @Column(name = "ROUTE_ID")
-    private String routeId;
+    @Column(name = "TRIP_ID")
+    private String tripId;
 
     @Column(name = "VEHICLE_ID")
     private String vehicleId;

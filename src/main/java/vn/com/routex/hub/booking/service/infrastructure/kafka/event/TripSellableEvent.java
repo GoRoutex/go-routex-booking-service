@@ -5,11 +5,14 @@ import lombok.Builder;
 import java.time.OffsetDateTime;
 
 @Builder
-public record RouteOpenForBookingEvent(
-        String routeId,
+public record TripSellableEvent(
+        String tripId,
         String vehicleId,
+        String assignedBy,
+        OffsetDateTime assignedAt,
+        String routeStatus,
         Long seatCount,
         String creator,
-        OffsetDateTime assignedAt
+        Boolean hasFloor
 ) {
 }

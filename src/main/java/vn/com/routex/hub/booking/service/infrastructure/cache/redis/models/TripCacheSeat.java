@@ -6,8 +6,8 @@ import vn.com.routex.hub.booking.service.domain.seat.SeatStatus;
 
 
 @Builder
-public record RouteCacheSeat(
-        String routeId,
+public record TripCacheSeat(
+        String tripId,
         String seatId,
         String seatNo,
         String seatTemplateId,
