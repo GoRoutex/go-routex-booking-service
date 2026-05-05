@@ -72,27 +72,28 @@ public class TripForSaleConsumer {
         }
 
         BaseRequest context = JsonUtils.convertValue(event.header().get("context"), BaseRequest.class);
-        TripSellableEvent routeEvent = JsonUtils.convertValue(event.payload().get("data"), TripSellableEvent.class);
+        TripSellableEvent tripEvent = JsonUtils.convertValue(event.payload().get("data"), TripSellableEvent.class);
 
         sLog.info("[TRIP-EVENT] Processing event: eventName={} eventId={} aggregateId={} tripId={} vehicleId={}",
                 event.eventType(),
                 event.eventId(),
                 event.aggregateId(),
-                routeEvent.tripId(),
-                routeEvent.vehicleId());
+                tripEvent.tripId(),
+                tripEvent.vehicleId());
 
-        sLog.info("[ROUTE-EVENT] Route Sellable Event: {}", routeEvent);
+        sLog.info("[TRIP-EVENT] Trip Sellable Event: {}", tripEvent);
 
         try {
-            validateEvent(event, context, routeEvent);
-            tripEventHandler.generateRouteSeat(event, context, routeEvent);
+            validateEvent(event, context, tripEvent);
+            sLog.info("VALIDATED");
+            tripEventHandler.generateRouteSeat(event, context, tripEvent);
         } catch (Exception ex) {
             sLog.error("[ROUTE-EVENT] Failed eventName={} eventId={} aggregateId={} routeId={} vehicleId={}",
                     event.eventType(),
                     event.eventId(),
                     event.aggregateId(),
-                    routeEvent.tripId(),
-                    routeEvent.vehicleId(),
+                    tripEvent.tripId(),
+                    tripEvent.vehicleId(),
                     ex);
             throw ex;
         }
@@ -101,18 +102,18 @@ public class TripForSaleConsumer {
 
         TripOpenForBookingEvent bookingEvent = TripOpenForBookingEvent
                 .builder()
-                .tripId(routeEvent.tripId())
-                .vehicleId(routeEvent.vehicleId())
-                .seatCount(routeEvent.seatCount())
-                .creator(routeEvent.creator())
-                .assignedAt(routeEvent.assignedAt())
+                .tripId(tripEvent.tripId())
+                .vehicleId(tripEvent.vehicleId())
+                .seatCount(tripEvent.seatCount())
+                .creator(tripEvent.creator())
+                .assignedAt(tripEvent.assignedAt())
                 .build();
 
         kafkaEventPublisher.publish(
                 context,
                 notificationTopic,
                 notificationActivitiesEvent,
-                routeEvent.tripId(),
+                tripEvent.tripId(),
                 bookingEvent
         );
 

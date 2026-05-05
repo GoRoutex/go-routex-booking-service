@@ -5,6 +5,7 @@ import feign.Request;
 import feign.Response;
 import feign.Util;
 import feign.codec.ErrorDecoder;
+import vn.com.routex.hub.booking.service.infrastructure.persistence.config.RequestAttributes;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.exception.CustomFeignException;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.ExceptionUtils;
@@ -25,9 +26,9 @@ public class ContextApiErrorDecoder implements ErrorDecoder {
         }
 
         Request request = response.request();
-        String requestId = firstHeader(request.headers(), "requestId");
-        String requestDateTime = firstHeader(request.headers(), "requestDateTime");
-        String channel = firstHeader(request.headers(), "channel");
+        String requestId = firstHeader(request.headers(), RequestAttributes.REQUEST_ID);
+        String requestDateTime = firstHeader(request.headers(), RequestAttributes.REQUEST_DATE_TIME);
+        String channel = firstHeader(request.headers(), RequestAttributes.CHANNEL);
         String responseCode = isTimeout(response.status()) ? ErrorConstant.TIMEOUT_ERROR : ErrorConstant.SYSTEM_ERROR;
         String description = isTimeout(response.status())
                 ? ErrorConstant.TIMEOUT_ERROR_MESSAGE

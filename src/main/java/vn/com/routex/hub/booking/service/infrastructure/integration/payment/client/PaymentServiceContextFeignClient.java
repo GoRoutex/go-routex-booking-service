@@ -14,6 +14,6 @@ import vn.com.routex.hub.booking.service.infrastructure.integration.payment.dto.
 )
 public interface PaymentServiceContextFeignClient {
 
-    @PostMapping("/api/v1/payment-service/payments/context")
+    @PostMapping("/context")
     FetchPaymentContextClientResponse fetchPaymentContext(@RequestBody FetchPaymentContextClientRequest request);
 }
