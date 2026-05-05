@@ -39,7 +39,6 @@ import static vn.com.routex.hub.booking.service.infrastructure.persistence.const
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.SEAT_NOT_FOUND;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.SYSTEM_ERROR;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.SYSTEM_ERROR_MESSAGE;
-import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.TRIP_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
