@@ -12,9 +12,8 @@ import vn.com.routex.hub.booking.service.domain.booking.model.Booking;
 import vn.com.routex.hub.booking.service.domain.booking.model.BookingSeat;
 import vn.com.routex.hub.booking.service.domain.booking.port.BookingRepositoryPort;
 import vn.com.routex.hub.booking.service.domain.booking.port.BookingSeatRepositoryPort;
-import vn.com.routex.hub.booking.service.domain.route.model.TripAssignmentRecord;
-import vn.com.routex.hub.booking.service.domain.route.port.TripAssignmentRepositoryPort;
 import vn.com.routex.hub.booking.service.domain.seat.model.TripSeat;
+import vn.com.routex.hub.booking.service.domain.tripcontext.model.TripBookingContext;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.exception.BusinessException;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.ExceptionUtils;
 
@@ -22,7 +21,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
-import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.ASSIGNMENT_NOT_FOUND;
+import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.INVALID_DATA_ERROR;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.RECORD_NOT_FOUND;
 
 
@@ -31,20 +30,23 @@ import static vn.com.routex.hub.booking.service.infrastructure.persistence.const
 public class BookingServiceImpl implements BookingService {
     private final BookingRepositoryPort bookingRepositoryPort;
     private final BookingSeatRepositoryPort bookingSeatRepositoryPort;
-    private final TripAssignmentRepositoryPort routeAssignmentRepositoryPort;
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
     @Override
     @Transactional
-    public Booking createBooking(CreateBookingCommand command, List<TripSeat> tripSeats) {
+    public Booking createBooking(CreateBookingCommand command, TripBookingContext tripContext, List<TripSeat> tripSeats) {
         sLog.info("[BOOK-SERVICE] Create Draft Booking Command: {}", command);
 
+        if (tripContext == null) {
+            throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
+                    ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, "Trip booking context not found"));
+        }
+        if (tripContext.getTicketPrice() == null || tripContext.getVehicleId() == null || tripContext.getVehicleId().isBlank()) {
+            throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
+                    ExceptionUtils.buildResultResponse(INVALID_DATA_ERROR, "Trip booking context is missing ticket price or vehicle"));
+        }
 
-        TripAssignmentRecord assignmentRecord = routeAssignmentRepositoryPort.findActiveByTripId(command.tripId())
-                .orElseThrow(() -> new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
-                        ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(ASSIGNMENT_NOT_FOUND, command.tripId()))));
-
-        BigDecimal basePrice = assignmentRecord.getTicketPrice();
+        BigDecimal basePrice = tripContext.getTicketPrice();
         BigDecimal totalAmount = basePrice.multiply(BigDecimal.valueOf(tripSeats.size()));
 
         Booking booking = Booking.builder()
@@ -52,7 +54,7 @@ public class BookingServiceImpl implements BookingService {
                 .bookingCode(bookingRepositoryPort.generateBookingCode())
                 .tripId(command.tripId())
                 .merchantId(command.merchantId())
-                .vehicleId(assignmentRecord.getVehicleId())
+                .vehicleId(tripContext.getVehicleId())
                 .customerId(command.customerId())
                 .customerName(command.customerName())
                 .customerPhone(command.customerPhone())

@@ -3,8 +3,6 @@ package vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.provinc
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -21,8 +19,7 @@ import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.entity.A
 @Table(name = "PROVINCES")
 public class ProvincesEntity extends AbstractAuditingEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private String id;
 
     @Column(name = "NAME", nullable = false, length = 100, unique = true)
     private String name;

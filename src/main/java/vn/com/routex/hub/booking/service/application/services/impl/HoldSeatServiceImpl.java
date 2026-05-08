@@ -10,11 +10,11 @@ import vn.com.routex.hub.booking.service.application.command.seat.HoldSeatResult
 import vn.com.routex.hub.booking.service.application.services.BookingService;
 import vn.com.routex.hub.booking.service.application.services.HoldSeatService;
 import vn.com.routex.hub.booking.service.domain.booking.model.Booking;
-import vn.com.routex.hub.booking.service.domain.route.model.RouteAggregate;
-import vn.com.routex.hub.booking.service.domain.route.port.RouteAggregateRepositoryPort;
 import vn.com.routex.hub.booking.service.domain.seat.SeatStatus;
 import vn.com.routex.hub.booking.service.domain.seat.model.TripSeat;
 import vn.com.routex.hub.booking.service.domain.seat.port.TripSeatRepositoryPort;
+import vn.com.routex.hub.booking.service.domain.tripcontext.model.TripBookingContext;
+import vn.com.routex.hub.booking.service.domain.tripcontext.port.TripBookingContextQueryPort;
 import vn.com.routex.hub.booking.service.infrastructure.cache.redis.models.TripCacheSeat;
 import vn.com.routex.hub.booking.service.infrastructure.cache.redis.service.TripSeatCacheService;
 import vn.com.routex.hub.booking.service.infrastructure.cache.redisson.RedisDistributedLocker;
@@ -39,14 +39,13 @@ import static vn.com.routex.hub.booking.service.infrastructure.persistence.const
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.SEAT_NOT_FOUND;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.SYSTEM_ERROR;
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.SYSTEM_ERROR_MESSAGE;
-import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.TRIP_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
 public class HoldSeatServiceImpl implements HoldSeatService {
 
     private final TripSeatRepositoryPort tripSeatRepositoryPort;
-    private final RouteAggregateRepositoryPort routeAggregateRepositoryPort;
+    private final TripBookingContextQueryPort tripBookingContextQueryPort;
     private final RedisDistributedService redisDistributedService;
     private final TripSeatCacheService tripSeatCacheService;
     private final BookingService bookingService;
@@ -62,7 +61,7 @@ public class HoldSeatServiceImpl implements HoldSeatService {
         String holdToken = UUID.randomUUID().toString();
         sLog.info("[BOOK-SERVICE] Hold Seat Command: {}", command);
         List<String> distinctSeatNos = validateAndNormalizeSeat(command);
-        RouteAggregate route = validateRoute(command);
+        TripBookingContext tripContext = tripBookingContextQueryPort.fetchByTripId(command.tripId(), command.context());
         return executeWithSeatLocks(command, distinctSeatNos, () -> {
             Map<String, TripCacheSeat> mapCacheSeats = tripSeatCacheService.getSpecificSeat(command.tripId(), distinctSeatNos);
             if(!mapCacheSeats.isEmpty()) {
@@ -81,7 +80,7 @@ public class HoldSeatServiceImpl implements HoldSeatService {
             tripSeats.forEach(seat -> seat.setStatus(SeatStatus.HELD));
             tripSeatRepositoryPort.saveAll(tripSeats);
             updateSeatCache(command.tripId(), tripSeats);
-            Booking booking = createBooking(command, route, holdToken, now, holdUntil, tripSeats);
+            Booking booking = createBooking(command, tripContext, holdToken, now, holdUntil, tripSeats);
 
             return HoldSeatResult.builder()
                     .booking(HoldSeatResult.HoldSeatBookingResult.builder()
@@ -117,10 +116,10 @@ public class HoldSeatServiceImpl implements HoldSeatService {
         tripSeatCacheService.updateSeatsStatus(tripId, updates);
     }
 
-    private Booking createBooking(HoldSeatCommand command, RouteAggregate route, String holdToken, OffsetDateTime heldAt, OffsetDateTime holdUntil, List<TripSeat> tripSeats) {
+    private Booking createBooking(HoldSeatCommand command, TripBookingContext tripContext, String holdToken, OffsetDateTime heldAt, OffsetDateTime holdUntil, List<TripSeat> tripSeats) {
         return bookingService.createBooking(CreateBookingCommand.builder()
                 .context(command.context())
-                .merchantId(route.getMerchantId())
+                .merchantId(tripContext.getMerchantId())
                 .tripId(command.tripId())
                 .holdBy(command.holdBy())
                 .holdToken(holdToken)
@@ -129,7 +128,7 @@ public class HoldSeatServiceImpl implements HoldSeatService {
                 .customerName(command.customerName())
                 .customerPhone(command.customerPhone())
                 .customerEmail(command.customerEmail())
-                .build(), tripSeats);
+                .build(), tripContext, tripSeats);
     }
 
     private List<TripSeat> getAndValidateRouteSeats(HoldSeatCommand command, List<String> distinctSeatNos) {
@@ -216,15 +215,5 @@ public class HoldSeatServiceImpl implements HoldSeatService {
         }
 
         return distinctSeatNos;
-    }
-
-    private RouteAggregate validateRoute(HoldSeatCommand command) {
-        return routeAggregateRepositoryPort.findById(command.tripId())
-                .orElseThrow(() -> new BusinessException(
-                        command.context().requestId(),
-                        command.context().requestDateTime(),
-                        command.context().channel(),
-                        ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(TRIP_NOT_FOUND, command.tripId()))
-                ));
     }
 }

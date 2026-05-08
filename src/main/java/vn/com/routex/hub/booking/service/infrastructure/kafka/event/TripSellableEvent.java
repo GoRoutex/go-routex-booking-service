@@ -1,6 +1,7 @@
 package vn.com.routex.hub.booking.service.infrastructure.kafka.event;
 
 import lombok.Builder;
+import vn.com.routex.hub.booking.service.domain.trip.TripStatus;
 
 import java.time.OffsetDateTime;
 
@@ -10,7 +11,7 @@ public record TripSellableEvent(
         String vehicleId,
         String assignedBy,
         OffsetDateTime assignedAt,
-        String routeStatus,
+        TripStatus status,
         Long seatCount,
         String creator,
         Boolean hasFloor

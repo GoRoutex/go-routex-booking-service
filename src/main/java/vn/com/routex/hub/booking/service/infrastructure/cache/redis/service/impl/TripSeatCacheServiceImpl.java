@@ -21,12 +21,12 @@ public class TripSeatCacheServiceImpl implements TripSeatCacheService {
 
     private final RedissonClient redissonClient;
 
-    private static final String ROUTE_SEAT_KEY = "route-seat:%s";
+    private static final String TRIP_SEAT_KEY = "trip-seat:%s";
     private static final Duration TTL = Duration.ofMinutes(30);
 
     @Override
     public void putSeats(String tripId, List<TripCacheSeat> cacheSeats) {
-        String key = String.format(ROUTE_SEAT_KEY, tripId);
+        String key = String.format(TRIP_SEAT_KEY, tripId);
         RMap<String, TripCacheSeat> map = redissonClient.getMap(key);
 
         Map<String, TripCacheSeat> seatMap = cacheSeats.stream()
@@ -42,7 +42,7 @@ public class TripSeatCacheServiceImpl implements TripSeatCacheService {
 
     @Override
     public List<TripCacheSeat> getSeats(String tripId) {
-        String key = String.format(ROUTE_SEAT_KEY, tripId);
+        String key = String.format(TRIP_SEAT_KEY, tripId);
 
         RMap<String, TripCacheSeat> map = redissonClient.getMap(key);
 
@@ -52,7 +52,7 @@ public class TripSeatCacheServiceImpl implements TripSeatCacheService {
 
     @Override
     public Map<String, TripCacheSeat> getSpecificSeat(String tripId, List<String> seatNos) {
-        String key = String.format(ROUTE_SEAT_KEY, tripId);
+        String key = String.format(TRIP_SEAT_KEY, tripId);
         RMap<String, TripCacheSeat> map = redissonClient.getMap(key);
 
         return map.getAll(new HashSet<>(seatNos));
@@ -60,7 +60,7 @@ public class TripSeatCacheServiceImpl implements TripSeatCacheService {
 
     @Override
     public void updateSeatsStatus(String tripId, List<TripCacheSeat> cacheSeats) {
-        String key = String.format(ROUTE_SEAT_KEY, tripId);
+        String key = String.format(TRIP_SEAT_KEY, tripId);
         RMap<String, TripCacheSeat> map = redissonClient.getMap(key);
         Map<String, TripCacheSeat> updates = cacheSeats
                 .stream()
@@ -71,7 +71,7 @@ public class TripSeatCacheServiceImpl implements TripSeatCacheService {
 
     @Override
     public void evictSeat(String tripId) {
-        String key = String.format(ROUTE_SEAT_KEY, tripId);
+        String key = String.format(TRIP_SEAT_KEY, tripId);
         redissonClient.getBucket(key).delete();
     }
 }
