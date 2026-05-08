@@ -95,7 +95,7 @@ public class TripForSaleConsumer {
                     tripEvent.tripId(),
                     tripEvent.vehicleId(),
                     ex);
-            throw ex;
+            acknowledgment.acknowledge();
         }
 
         sLog.info("[ROUTE-EVENT] Event processed successfully: eventName={} eventId={} routeId={}", event.eventType(), event.eventId(), event.aggregateId());

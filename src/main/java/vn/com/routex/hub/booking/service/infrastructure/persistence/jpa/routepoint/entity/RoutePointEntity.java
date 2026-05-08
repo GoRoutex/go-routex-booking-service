@@ -49,8 +49,8 @@ public class RoutePointEntity extends AbstractAuditingEntity {
     @Column(name = "NOTE")
     private String note;
 
-    @Column(name = "OPERATION_POINT_ID")
-    private String operationPointId;
+    @Column(name = "DEPARTMENT_ID")
+    private String departmentId;
 
     @Column(name = "STOP_NAME")
     private String stopName;

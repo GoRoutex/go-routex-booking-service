@@ -57,12 +57,12 @@ spring:
       dead-letter: "bus-dead-letter-queue"
 
     group-id:
-      trips: "trip-service"
+      trips: "booking-service-trips"
       bookings: "booking-service"
-      payments: "payment-service"
+      payments: "booking-service-payments"
       payment-succeeded: "booking-service-payment-succeeded"
       payment-failed: "booking-service-payment-failed"
-      routes: "routes-service"
+      routes: "booking-service-routes"
 
     listener:
       ack-mode: manual

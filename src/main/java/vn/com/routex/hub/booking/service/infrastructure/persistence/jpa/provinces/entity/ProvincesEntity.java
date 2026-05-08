@@ -21,8 +21,7 @@ import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.entity.A
 @Table(name = "PROVINCES")
 public class ProvincesEntity extends AbstractAuditingEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private String id;
 
     @Column(name = "NAME", nullable = false, length = 100, unique = true)
     private String name;
