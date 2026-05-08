@@ -9,17 +9,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface DepartmentRepositoryPort {
-    Optional<Department> findByCode(String code);
-
-    Optional<Department> findByCode(String code, String merchantId);
 
     Optional<Department> findById(String id);
 
     Optional<Department> findById(String id, String merchantId);
-
-    boolean existsByCode(String code);
-
-    boolean existsByCode(String code, String merchantId);
 
     List<Department> findByMerchantId(String merchantId);
 

@@ -9,18 +9,9 @@ import vn.com.routex.hub.booking.service.infrastructure.persistence.jpa.departme
 import java.util.List;
 import java.util.Optional;
 
-
 @Repository
 public interface DepartmentEntityRepository extends JpaRepository<DepartmentEntity, String> {
-    Optional<DepartmentEntity> findByCode(String code);
-
     Optional<DepartmentEntity> findByIdAndMerchantId(String id, String merchantId);
-
-    Optional<DepartmentEntity> findByCodeAndMerchantId(String code, String merchantId);
-
-    boolean existsByCode(String code);
-
-    boolean existsByCodeAndMerchantId(String code, String merchantId);
 
     List<DepartmentEntity> findByMerchantId(String merchantId);
 
