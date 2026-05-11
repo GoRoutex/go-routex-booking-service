@@ -1,11 +1,12 @@
 package vn.com.routex.hub.booking.service.infrastructure.cache.redis.service.impl;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import tools.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import vn.com.go.routex.identity.security.log.SystemLog;
 import vn.com.routex.hub.booking.service.infrastructure.cache.redis.service.RedisInfraService;
 
@@ -49,7 +50,7 @@ public class RedisInfraServiceImpl implements RedisInfraService {
     }
 
     @Override
-    public <T> T getObject(String key, Class<T> targetClass) {
+    public <T> T getObject(String key, Class<T> targetClass) throws JsonProcessingException {
 
         Object result = redisTemplate.opsForValue().get(key);
         sLog.info("Get Cached: {}", result);

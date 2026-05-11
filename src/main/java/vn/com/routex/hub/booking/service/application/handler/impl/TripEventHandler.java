@@ -59,7 +59,7 @@ public class TripEventHandler implements TripEvent {
                 payload.tripId(), payload.vehicleId(), blueprint.getSeatCapacity(), blueprint.isHasFloor());
 
         Map<String, VehicleSeatBlueprint.SeatBlueprintItem> blueprintMap = blueprint.getSeats().stream()
-                .collect(java.util.stream.Collectors.toMap(VehicleSeatBlueprint.SeatBlueprintItem::getId, Function.identity()));
+                .collect(Collectors.toMap(VehicleSeatBlueprint.SeatBlueprintItem::getId, Function.identity()));
 
         List<TripSeat> seats = blueprint.getSeats().stream()
                 .map(seatBlueprint -> TripSeat.builder()
