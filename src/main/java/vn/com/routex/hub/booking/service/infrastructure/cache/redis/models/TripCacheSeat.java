@@ -5,7 +5,7 @@ import vn.com.routex.hub.booking.service.domain.seat.SeatFloor;
 import vn.com.routex.hub.booking.service.domain.seat.SeatStatus;
 
 
-@Builder
+@Builder(toBuilder = true)
 public record TripCacheSeat(
         String tripId,
         String seatId,

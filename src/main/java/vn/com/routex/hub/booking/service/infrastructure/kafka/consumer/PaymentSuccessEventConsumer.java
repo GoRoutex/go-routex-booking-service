@@ -59,30 +59,32 @@ public class PaymentSuccessEventConsumer {
             return;
         }
 
-        BaseRequest context = JsonUtils.convertValue(event.header().get("context"), BaseRequest.class);
-        PaymentSuccessEvent paymentEvent = JsonUtils.convertValue(event.payload().get("data"), PaymentSuccessEvent.class);
-
-        sLog.info("[PAYMENT-EVENT] Processing event: eventName={} eventId={} aggregateId={} paymentId={} customerId={}",
-                event.eventType(),
-                event.eventId(),
-                event.aggregateId(),
-                paymentEvent.paymentId(),
-                paymentEvent.customerId());
-
-
+        BaseRequest context;
+        PaymentSuccessEvent paymentEvent;
         try {
+
+            context = JsonUtils.convertValue(event.header().get("context"), BaseRequest.class);
+            paymentEvent = JsonUtils.convertValue(event.payload().get("data"), PaymentSuccessEvent.class);
+
+            sLog.info("[PAYMENT-EVENT] Processing event: eventName={} eventId={} aggregateId={} paymentId={} customerId={}",
+                    event.eventType(),
+                    event.eventId(),
+                    event.aggregateId(),
+                    paymentEvent.paymentId(),
+                    paymentEvent.customerId());
             validateEvent(event, context, paymentEvent);
             paymentEventHandler.updateSuccessPayment(event, context, paymentEvent);
             sLog.info("[PAYMENT-EVENT] Event processed successfully: eventName={} eventId={} paymentId={}", event.eventType(), event.eventId(), event.aggregateId());
             acknowledgment.acknowledge();
         } catch(Exception ex) {
-            sLog.error("[PAYMENT-EVENT] Failed eventName={} eventId={} aggregateId={} paymentId={} bookingCode={}",
+            sLog.error("[PAYMENT-EVENT] Failed eventName={} eventId={} aggregateId={}",
                     event.eventType(),
                     event.eventId(),
                     event.aggregateId(),
-                    paymentEvent.paymentId(),
-                    paymentEvent.bookingCode(),
                     ex);
+
+
+            sLog.error("Exception: {}", org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(ex));
             throw ex;
         }
         // Publish event for notification

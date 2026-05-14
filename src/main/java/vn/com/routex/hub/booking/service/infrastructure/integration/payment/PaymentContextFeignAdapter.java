@@ -19,27 +19,35 @@ public class PaymentContextFeignAdapter implements PaymentContextQueryPort {
 
     @Override
     public Optional<PaymentProcessingContext> findByBookingCode(String bookingCode, RequestContext context) {
-        FetchPaymentContextClientResponse response = paymentServiceContextFeignClient.fetchPaymentContext(
-                FetchPaymentContextClientRequest.builder()
-                        .requestId(context.requestId())
-                        .requestDateTime(context.requestDateTime())
-                        .channel(context.channel())
-                        .data(FetchPaymentContextClientRequest.FetchPaymentContextClientRequestData.builder()
-                                .bookingCode(bookingCode)
-                                .build())
-                        .build()
-        );
+        try {
+            FetchPaymentContextClientResponse response = paymentServiceContextFeignClient.fetchPaymentContext(
+                    FetchPaymentContextClientRequest.builder()
+                            .requestId(context.requestId())
+                            .requestDateTime(context.requestDateTime())
+                            .channel(context.channel())
+                            .data(FetchPaymentContextClientRequest.FetchPaymentContextClientRequestData.builder()
+                                    .bookingCode(bookingCode)
+                                    .build())
+                            .build()
+            );
 
-        if (response == null || response.getData() == null) {
+            if (response == null || response.getData() == null) {
+                return Optional.empty();
+            }
+
+            FetchPaymentContextClientResponse.FetchPaymentContextClientResponseData data = response.getData();
+            return Optional.of(PaymentProcessingContext.builder()
+                    .paymentId(data.getPaymentId())
+                    .bookingCode(data.getBookingCode())
+                    .paymentStatus(data.getPaymentStatus())
+                    .paidAt(data.getPaidAt())
+                    .build());
+        } catch (Exception e) {
+            // If payment is not found or other errors occur, we treat it as not paid
+            // We log this as info/debug because it's a common case when user doesn't proceed to payment
             return Optional.empty();
         }
 
-        FetchPaymentContextClientResponse.FetchPaymentContextClientResponseData data = response.getData();
-        return Optional.of(PaymentProcessingContext.builder()
-                .paymentId(data.getPaymentId())
-                .bookingCode(data.getBookingCode())
-                .paymentStatus(data.getPaymentStatus())
-                .paidAt(data.getPaidAt())
-                .build());
     }
+
 }

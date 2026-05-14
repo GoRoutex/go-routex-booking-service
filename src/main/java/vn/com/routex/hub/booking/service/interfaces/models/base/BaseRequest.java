@@ -12,9 +12,9 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
-import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ApplicationConstant.CHANNEL_REGREX;
-import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ApplicationConstant.DATETIME_REGREX;
-import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ApplicationConstant.REQUEST_ID_REGREX;
+import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ApplicationConstant.CHANNEL_REGEX;
+import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ApplicationConstant.DATETIME_REGEX;
+import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ApplicationConstant.REQUEST_ID_REGEX;
 
 @Getter
 @Setter
@@ -26,16 +26,16 @@ import static vn.com.routex.hub.booking.service.infrastructure.persistence.const
 public class BaseRequest {
 
     @NotBlank
-    @Pattern(regexp = REQUEST_ID_REGREX, message = "RequestId must be in xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx")
+    @Pattern(regexp = REQUEST_ID_REGEX, message = "RequestId must be in xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx")
     private String requestId;
 
     @NotBlank
-    @Pattern(regexp = DATETIME_REGREX, message = "RequestDateTime must be in yyyy-MM-dd'T'HH:mm:ss.SSS format (e.g: 2025-11-01T16:27:00.135+7:00)")
+    @Pattern(regexp = DATETIME_REGEX, message = "RequestDateTime must be in yyyy-MM-dd'T'HH:mm:ss.SSS format (e.g: 2025-11-01T16:27:00.135+7:00)")
     private String requestDateTime;
 
     @NotBlank
     @Size(max = 30, message = "Channel can't exceed 30 characters")
-    @Pattern(regexp = CHANNEL_REGREX, message = "Channel must be ONL, OFF")
+    @Pattern(regexp = CHANNEL_REGEX, message = "Channel must be ONL, OFF, INTERNAL")
     private String channel;
 }
 

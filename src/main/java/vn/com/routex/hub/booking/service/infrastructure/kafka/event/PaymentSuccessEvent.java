@@ -5,7 +5,6 @@ import lombok.Builder;
 import vn.com.routex.hub.booking.service.domain.booking.PaymentStatus;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
 
 @Builder
 public record PaymentSuccessEvent(
@@ -14,7 +13,6 @@ public record PaymentSuccessEvent(
         String bookingCode,
         BigDecimal amount,
         PaymentStatus status,
-        OffsetDateTime paidAt,
         String currency
 ) {
 }

@@ -21,6 +21,7 @@ import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.Except
 import vn.com.routex.hub.booking.service.interfaces.models.base.BaseRequest;
 
 import java.time.OffsetDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -59,7 +60,7 @@ public class TripEventHandler implements TripEvent {
                 payload.tripId(), payload.vehicleId(), blueprint.getSeatCapacity(), blueprint.isHasFloor());
 
         Map<String, VehicleSeatBlueprint.SeatBlueprintItem> blueprintMap = blueprint.getSeats().stream()
-                .collect(java.util.stream.Collectors.toMap(VehicleSeatBlueprint.SeatBlueprintItem::getId, Function.identity()));
+                .collect(Collectors.toMap(VehicleSeatBlueprint.SeatBlueprintItem::getId, Function.identity()));
 
         List<TripSeat> seats = blueprint.getSeats().stream()
                 .map(seatBlueprint -> TripSeat.builder()
@@ -89,6 +90,7 @@ public class TripEventHandler implements TripEvent {
                             .colNo(seatBlueprint.getColumnNo())
                             .build();
                 })
+                .sorted(Comparator.comparing(TripCacheSeat::seatNo))
                 .toList();
 
         sLog.info("[TRIP-CACHE] Trip Seat Cache Data: {}", cacheData);
