@@ -9,8 +9,9 @@ import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 import vn.com.go.routex.identity.security.log.SystemLog;
 import vn.com.routex.hub.booking.service.application.handler.impl.TripEventHandler;
-import vn.com.routex.hub.booking.service.infrastructure.kafka.config.KafkaEventPublisher;
+import vn.com.routex.hub.booking.service.application.services.OutBoxService;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.event.DomainEvent;
+
 import vn.com.routex.hub.booking.service.infrastructure.kafka.event.TripOpenForBookingEvent;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.event.TripSellableEvent;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.exception.BusinessException;
@@ -36,7 +37,7 @@ public class TripForSaleConsumer {
     @Value("${spring.kafka.events.notification-activities}")
     private String notificationActivitiesEvent;
 
-    private final KafkaEventPublisher kafkaEventPublisher;
+    private final OutBoxService outBoxService;
     private final TripEventHandler tripEventHandler;
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
@@ -96,6 +97,7 @@ public class TripForSaleConsumer {
                     tripEvent.vehicleId(),
                     ex);
             acknowledgment.acknowledge();
+            return;
         }
 
         sLog.info("[ROUTE-EVENT] Event processed successfully: eventName={} eventId={} routeId={}", event.eventType(), event.eventId(), event.aggregateId());
@@ -109,16 +111,18 @@ public class TripForSaleConsumer {
                 .assignedAt(tripEvent.assignedAt())
                 .build();
 
-        kafkaEventPublisher.publish(
-                context,
+        outBoxService.generateEvent(
+                tripEvent.tripId(),
                 notificationTopic,
                 notificationActivitiesEvent,
-                tripEvent.tripId(),
-                bookingEvent
+                notificationActivitiesEvent,
+                bookingEvent,
+                context
         );
 
         acknowledgment.acknowledge();
     }
+
 
 
     public void validateEvent(DomainEvent event, BaseRequest context, TripSellableEvent data) {

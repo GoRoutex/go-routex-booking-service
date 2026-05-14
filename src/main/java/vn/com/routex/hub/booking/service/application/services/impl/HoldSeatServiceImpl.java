@@ -2,7 +2,10 @@ package vn.com.routex.hub.booking.service.application.services.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import vn.com.go.routex.identity.security.jwt.JwtAuthenticatedUser;
 import vn.com.go.routex.identity.security.log.SystemLog;
 import vn.com.routex.hub.booking.service.application.command.booking.CreateBookingCommand;
 import vn.com.routex.hub.booking.service.application.command.seat.HoldSeatCommand;
@@ -19,6 +22,8 @@ import vn.com.routex.hub.booking.service.infrastructure.cache.redis.models.TripC
 import vn.com.routex.hub.booking.service.infrastructure.cache.redis.service.TripSeatCacheService;
 import vn.com.routex.hub.booking.service.infrastructure.cache.redisson.RedisDistributedLocker;
 import vn.com.routex.hub.booking.service.infrastructure.cache.redisson.RedisDistributedService;
+import vn.com.routex.hub.booking.service.infrastructure.integration.userservice.client.UserServiceInternalContextFeignClient;
+import vn.com.routex.hub.booking.service.infrastructure.integration.userservice.dto.FetchCustomerByUserIdClientResponse;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.exception.BusinessException;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.utils.ExceptionUtils;
 
@@ -49,14 +54,27 @@ public class HoldSeatServiceImpl implements HoldSeatService {
     private final RedisDistributedService redisDistributedService;
     private final TripSeatCacheService tripSeatCacheService;
     private final BookingService bookingService;
-
-
+    private final UserServiceInternalContextFeignClient userServiceClient;
     private static final String LOCK_PATTERN = "lock:seat:";
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
     @Override
     @Transactional
     public HoldSeatResult holdSeat(HoldSeatCommand command) {
+
+        String currentUser = getCurrentUserId();
+        String customerId = null;
+        if (currentUser != null) {
+            try {
+                FetchCustomerByUserIdClientResponse response = userServiceClient.fetchCustomerByUserId(currentUser);
+                if (response != null && response.getData() != null) {
+                    customerId = response.getData().getId();
+                }
+            } catch (Exception e) {
+                sLog.error("[BOOK-SERVICE] Failed to fetch customer for user {}", currentUser, e);
+            }
+        }
+        final String finalCustomerId = customerId;
 
         String holdToken = UUID.randomUUID().toString();
         sLog.info("[BOOK-SERVICE] Hold Seat Command: {}", command);
@@ -80,7 +98,7 @@ public class HoldSeatServiceImpl implements HoldSeatService {
             tripSeats.forEach(seat -> seat.setStatus(SeatStatus.HELD));
             tripSeatRepositoryPort.saveAll(tripSeats);
             updateSeatCache(command.tripId(), tripSeats);
-            Booking booking = createBooking(command, tripContext, holdToken, now, holdUntil, tripSeats);
+            Booking booking = createBooking(command, tripContext, holdToken, now, holdUntil, tripSeats, currentUser, finalCustomerId);
 
             return HoldSeatResult.builder()
                     .booking(HoldSeatResult.HoldSeatBookingResult.builder()
@@ -116,7 +134,7 @@ public class HoldSeatServiceImpl implements HoldSeatService {
         tripSeatCacheService.updateSeatsStatus(tripId, updates);
     }
 
-    private Booking createBooking(HoldSeatCommand command, TripBookingContext tripContext, String holdToken, OffsetDateTime heldAt, OffsetDateTime holdUntil, List<TripSeat> tripSeats) {
+    private Booking createBooking(HoldSeatCommand command, TripBookingContext tripContext, String holdToken, OffsetDateTime heldAt, OffsetDateTime holdUntil, List<TripSeat> tripSeats, String currentUser, String finalCustomerId) {
         return bookingService.createBooking(CreateBookingCommand.builder()
                 .context(command.context())
                 .merchantId(tripContext.getMerchantId())
@@ -128,6 +146,7 @@ public class HoldSeatServiceImpl implements HoldSeatService {
                 .customerName(command.customerName())
                 .customerPhone(command.customerPhone())
                 .customerEmail(command.customerEmail())
+                .customerId(finalCustomerId)
                 .build(), tripContext, tripSeats);
     }
 
@@ -185,6 +204,16 @@ public class HoldSeatServiceImpl implements HoldSeatService {
             throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
                     ExceptionUtils.buildResultResponse(SYSTEM_ERROR, SYSTEM_ERROR_MESSAGE));
         }
+    }
+
+    private String getCurrentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getName())) {
+            if(authentication.getPrincipal() instanceof JwtAuthenticatedUser principal) {
+                return principal.userId();
+            }
+        }
+        return null;
     }
     private List<String> validateAndNormalizeSeat(HoldSeatCommand command) {
         if (command.seatNos() == null || command.seatNos().isEmpty()) {

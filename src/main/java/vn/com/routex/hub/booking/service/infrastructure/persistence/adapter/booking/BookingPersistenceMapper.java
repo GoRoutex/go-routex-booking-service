@@ -70,7 +70,7 @@ public class BookingPersistenceMapper {
                 .build();
     }
 
-    public BookingSeatEntity toJpaEntity(BookingSeat bookingSeat) {
+    public BookingSeatEntity toEntity(BookingSeat bookingSeat) {
         return BookingSeatEntity.builder()
                 .id(bookingSeat.getId())
                 .bookingId(bookingSeat.getBookingId())

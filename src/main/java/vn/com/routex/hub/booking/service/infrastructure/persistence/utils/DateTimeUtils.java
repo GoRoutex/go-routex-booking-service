@@ -5,6 +5,7 @@ import vn.com.routex.hub.booking.service.infrastructure.persistence.exception.Bu
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 
 import static vn.com.routex.hub.booking.service.infrastructure.persistence.constant.ErrorConstant.INVALID_INPUT_ERROR;
@@ -14,6 +15,17 @@ import static vn.com.routex.hub.booking.service.infrastructure.persistence.const
 public class DateTimeUtils {
 
     public static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm");
+
+    public static final DateTimeFormatter ISO_SSS_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+
+    /**
+     * Tạo chuỗi thời gian hiện tại khớp với DATETIME_REGREX
+     * Kết quả mẫu: 2026-05-14T17:35:10.123+07:00
+     */
+    public static String getCurrentRequestDateTime() {
+        return OffsetDateTime.now().format(ISO_SSS_FORMATTER);
+    }
 
     public int parseIntOrThrow(String v, String field, String requestId, String requestDateTime, String channel) {
         if (v == null || v.isBlank()) {

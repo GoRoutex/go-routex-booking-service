@@ -18,8 +18,6 @@ public class RouteStopPlan {
     private String routeId;
     private String creator;
     private int stopOrder;
-    private OffsetDateTime plannedArrivalTime;
-    private OffsetDateTime plannedDepartureTime;
     private String note;
     private String departmentId;
     private String stopName;
@@ -27,6 +25,8 @@ public class RouteStopPlan {
     private String stopCity;
     private Double stopLatitude;
     private Double stopLongitude;
+    private Long stayDuration;
+    private Integer timeAtDepartment;
     private OffsetDateTime createdAt;
     private String createdBy;
 }

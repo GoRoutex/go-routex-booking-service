@@ -90,6 +90,5 @@ public class TripSeatManagementController {
                 .totalAmount(item.booking().totalAmount())
                 .currency(item.booking().currency())
                 .build();
-
     }
 }
