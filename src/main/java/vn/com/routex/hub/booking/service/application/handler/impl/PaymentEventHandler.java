@@ -114,9 +114,6 @@ public class PaymentEventHandler implements PaymentEvent {
     private List<Ticket> processSuccessfulBooking(BookingAggregate aggregate, BaseRequest context, OffsetDateTime paidAt) {
         // Cập nhật trạng thái ghế trong Trip
         aggregate.tripSeats().forEach(seat -> seat.setStatus(SeatStatus.SOLD));
-
-        sLog.info("Trip Seats: {}", aggregate.tripSeats());
-
         // Xuất vé và gắn vào booking seats
         List<Ticket> tickets = createTickets(aggregate, paidAt);
         attachIssuedTickets(aggregate.bookingSeats(), tickets);
@@ -226,9 +223,11 @@ public class PaymentEventHandler implements PaymentEvent {
                 .build();
 
 
+        sLog.info("Ticket request: {}", request);
 
         CreateTicketClientResponse response = merchantTicketFeignClient.createTickets(request);
 
+        sLog.info("Ticket Response: {}", response);
         return response.getData().stream()
                 .map(item -> Ticket.builder()
                         .id(item.getTicketId())
@@ -255,10 +254,11 @@ public class PaymentEventHandler implements PaymentEvent {
     }
 
 
-    private List<BookingSeat> attachIssuedTickets(List<BookingSeat> bookingSeats, List<Ticket> tickets) {
+    private void attachIssuedTickets(List<BookingSeat> bookingSeats, List<Ticket> tickets) {
 
-        return bookingSeats.stream()
+        bookingSeats.stream()
                 .map(bookingSeat -> {
+                    sLog.info("Ticket: {}", tickets);
                     Ticket matchedTicket = tickets.stream()
                             .filter(ticket -> ticket.getBookingSeatId().equals(bookingSeat.getId()))
                             .findFirst()

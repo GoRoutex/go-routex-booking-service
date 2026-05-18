@@ -111,8 +111,6 @@ public class TripSeatCacheServiceImpl implements TripSeatCacheService {
                                 TripCacheSeat mergedSeat = existing.toBuilder()
                                         .status(seat.status())
                                         .build();
-
-                                sLog.info("Merged Seat: {}", mergedSeat);
                                 return objectMapper.writeValueAsString(mergedSeat);
                             } catch(Exception e) {
                                 throw new RuntimeException("Error deserializing seat: ", e);
