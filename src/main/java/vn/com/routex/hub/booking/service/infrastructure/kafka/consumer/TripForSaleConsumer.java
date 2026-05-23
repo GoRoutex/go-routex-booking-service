@@ -11,7 +11,6 @@ import vn.com.go.routex.identity.security.log.SystemLog;
 import vn.com.routex.hub.booking.service.application.handler.impl.TripEventHandler;
 import vn.com.routex.hub.booking.service.application.services.OutBoxService;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.event.DomainEvent;
-
 import vn.com.routex.hub.booking.service.infrastructure.kafka.event.TripOpenForBookingEvent;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.event.TripSellableEvent;
 import vn.com.routex.hub.booking.service.infrastructure.persistence.exception.BusinessException;

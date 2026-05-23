@@ -107,5 +107,23 @@ public class BookingEntity extends AbstractAuditingEntity {
     @Column(name = "CREATOR")
     private String creator;
 
+    @Column(name = "PICKUP_TYPE")
+    private String pickupType;
+
+    @Column(name = "PICKUP_STOP_ID")
+    private String pickupStopId;
+
+    @Column(name = "PICKUP_ADDRESS")
+    private String pickupAddress;
+
+    @Column(name = "DROPOFF_TYPE")
+    private String dropoffType;
+
+    @Column(name = "DROPOFF_STOP_ID")
+    private String dropoffStopId;
+
+    @Column(name = "DROPOFF_ADDRESS")
+    private String dropoffAddress;
+
 
 }

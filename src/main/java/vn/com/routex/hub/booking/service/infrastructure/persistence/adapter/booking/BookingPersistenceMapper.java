@@ -30,6 +30,12 @@ public class BookingPersistenceMapper {
                 .cancelledAt(entity.getCancelledAt())
                 .note(entity.getNote())
                 .creator(entity.getCreator())
+                .pickupType(entity.getPickupType())
+                .pickupStopId(entity.getPickupStopId())
+                .pickupAddress(entity.getPickupAddress())
+                .dropoffType(entity.getDropoffType())
+                .dropoffStopId(entity.getDropoffStopId())
+                .dropoffAddress(entity.getDropoffAddress())
                 .build();
     }
 
@@ -54,6 +60,12 @@ public class BookingPersistenceMapper {
                 .cancelledAt(booking.getCancelledAt())
                 .note(booking.getNote())
                 .creator(booking.getCreator())
+                .pickupType(booking.getPickupType())
+                .pickupStopId(booking.getPickupStopId())
+                .pickupAddress(booking.getPickupAddress())
+                .dropoffType(booking.getDropoffType())
+                .dropoffStopId(booking.getDropoffStopId())
+                .dropoffAddress(booking.getDropoffAddress())
                 .build();
     }
 

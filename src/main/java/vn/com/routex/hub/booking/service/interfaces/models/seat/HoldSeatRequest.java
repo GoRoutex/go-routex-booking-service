@@ -53,5 +53,12 @@ public class HoldSeatRequest extends BaseRequest {
         private List<String> seatNos;
 
         private String holdBy;
+
+        private String pickupType;
+        private String pickupStopId;
+        private String pickupAddress;
+        private String dropoffType;
+        private String dropoffStopId;
+        private String dropoffAddress;
     }
 }

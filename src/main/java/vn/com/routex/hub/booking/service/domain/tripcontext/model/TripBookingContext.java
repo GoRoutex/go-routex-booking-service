@@ -19,7 +19,6 @@ public class TripBookingContext {
     private String merchantId;
     private String vehicleId;
     private BigDecimal ticketPrice;
-    private String pickupBranch;
     private String originName;
     private String destinationName;
     private String routeStatus;

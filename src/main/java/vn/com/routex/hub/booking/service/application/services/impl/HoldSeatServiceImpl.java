@@ -147,6 +147,12 @@ public class HoldSeatServiceImpl implements HoldSeatService {
                 .customerPhone(command.customerPhone())
                 .customerEmail(command.customerEmail())
                 .customerId(finalCustomerId)
+                .pickupType(command.pickupType())
+                .pickupStopId(command.pickupStopId())
+                .pickupAddress(command.pickupAddress())
+                .dropoffType(command.dropoffType())
+                .dropoffStopId(command.dropoffStopId())
+                .dropoffAddress(command.dropoffAddress())
                 .build(), tripContext, tripSeats);
     }
 

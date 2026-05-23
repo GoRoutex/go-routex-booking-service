@@ -37,5 +37,11 @@ public class CreateTicketClientRequest extends BaseRequest {
         private BigDecimal price;
         private OffsetDateTime issuedAt;
         private String creator;
+        private String pickupType;
+        private String pickupStopId;
+        private String pickupAddress;
+        private String dropoffType;
+        private String dropoffStopId;
+        private String dropoffAddress;
     }
 }

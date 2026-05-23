@@ -218,6 +218,12 @@ public class PaymentEventHandler implements PaymentEvent {
                                 .price(bookingSeat.getPrice())
                                 .issuedAt(issuedAt)
                                 .creator(aggregate.booking().getCreator())
+                                .pickupType(aggregate.booking().getPickupType())
+                                .pickupStopId(aggregate.booking().getPickupStopId())
+                                .pickupAddress(aggregate.booking().getPickupAddress())
+                                .dropoffType(aggregate.booking().getDropoffType())
+                                .dropoffStopId(aggregate.booking().getDropoffStopId())
+                                .dropoffAddress(aggregate.booking().getDropoffAddress())
                                 .build())
                         .collect(Collectors.toList()))
                 .build();
@@ -247,8 +253,13 @@ public class PaymentEventHandler implements PaymentEvent {
                                 .map(BookingSeat::getPrice)
                                 .orElse(java.math.BigDecimal.ZERO))
                         .status(TicketStatus.valueOf(item.getStatus()))
-
                         .issuedAt(issuedAt)
+                        .pickupType(aggregate.booking().getPickupType())
+                        .pickupStopId(aggregate.booking().getPickupStopId())
+                        .pickupAddress(aggregate.booking().getPickupAddress())
+                        .dropoffType(aggregate.booking().getDropoffType())
+                        .dropoffStopId(aggregate.booking().getDropoffStopId())
+                        .dropoffAddress(aggregate.booking().getDropoffAddress())
                         .build())
                 .collect(Collectors.toList());
     }

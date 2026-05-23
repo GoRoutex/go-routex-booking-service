@@ -53,6 +53,12 @@ public class TripSeatManagementController {
                 .customerName(request.getInfo().getCustomerName())
                 .customerPhone(request.getInfo().getCustomerPhone())
                 .customerEmail(request.getInfo().getCustomerEmail())
+                .pickupType(request.getData().getPickupType())
+                .pickupStopId(request.getData().getPickupStopId())
+                .pickupAddress(request.getData().getPickupAddress())
+                .dropoffType(request.getData().getDropoffType())
+                .dropoffStopId(request.getData().getDropoffStopId())
+                .dropoffAddress(request.getData().getDropoffAddress())
                 .build());
 
         List<HoldSeatResponse.HoldSeatResponseData> responseData = result.seats().stream()

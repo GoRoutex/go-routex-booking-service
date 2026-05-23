@@ -35,4 +35,10 @@ public class Booking {
     private OffsetDateTime cancelledAt;
     private String note;
     private String creator;
+    private String pickupType;
+    private String pickupStopId;
+    private String pickupAddress;
+    private String dropoffType;
+    private String dropoffStopId;
+    private String dropoffAddress;
 }

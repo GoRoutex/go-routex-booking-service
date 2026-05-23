@@ -17,6 +17,12 @@ public record CreateBookingCommand(
         String customerId,
         String customerName,
         String customerPhone,
-        String customerEmail
+        String customerEmail,
+        String pickupType,
+        String pickupStopId,
+        String pickupAddress,
+        String dropoffType,
+        String dropoffStopId,
+        String dropoffAddress
 ) {
 }

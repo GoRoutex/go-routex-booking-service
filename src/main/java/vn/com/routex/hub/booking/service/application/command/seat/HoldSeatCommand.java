@@ -13,6 +13,12 @@ public record HoldSeatCommand(
         String holdBy,
         String customerName,
         String customerPhone,
-        String customerEmail
+        String customerEmail,
+        String pickupType,
+        String pickupStopId,
+        String pickupAddress,
+        String dropoffType,
+        String dropoffStopId,
+        String dropoffAddress
 ) {
 }
