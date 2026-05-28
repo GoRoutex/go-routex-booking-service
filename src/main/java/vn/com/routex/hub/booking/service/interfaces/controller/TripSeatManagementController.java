@@ -47,6 +47,7 @@ public class TripSeatManagementController {
 
         HoldSeatResult result = holdSeatService.holdSeat(HoldSeatCommand.builder()
                 .context(HttpUtils.toContext(request))
+                        .creator(request.getCreator())
                 .tripId(request.getData().getTripId())
                 .seatNos(request.getData().getSeatNos())
                 .holdBy(request.getData().getHoldBy())

@@ -14,6 +14,9 @@ service MerchantGrpcService {
   // Internal Booking Context APIs
   rpc GetTripBookingContext (TripBookingContextRequest) returns (TripBookingContextResponse);
   rpc GetVehicleSeatBlueprint (VehicleSeatBlueprintRequest) returns (VehicleSeatBlueprintResponse);
+
+  // Ticket creation
+  rpc CreateTickets (CreateTicketsRequest) returns (CreateTicketsResponse);
 }
 
 message RouteNamesRequest {
@@ -99,4 +102,41 @@ message SeatBlueprintItem {
   string floor = 3;
   int32 row_no = 4;
   int32 column_no = 5;
+}
+
+message CreateTicketsRequest {
+  repeated CreateTicketItem data = 1;
+  RequestContext context = 2;
+}
+
+message CreateTicketItem {
+  string booking_id = 1;
+  string booking_seat_id = 2;
+  string merchant_id = 3;
+  string trip_id = 4;
+  string vehicle_id = 5;
+  string seat_number = 6;
+  string customer_name = 7;
+  string customer_phone = 8;
+  string customer_email = 9;
+  string price = 10;
+  string issued_at = 11; // ISO OffsetDateTime string
+  string creator = 12;
+  string pickup_type = 13;
+  string pickup_stop_id = 14;
+  string pickup_address = 15;
+  string dropoff_type = 16;
+  string dropoff_stop_id = 17;
+  string dropoff_address = 18;
+}
+
+message CreateTicketsResponse {
+  repeated CreateTicketResultData data = 1;
+}
+
+message CreateTicketResultData {
+  string ticket_id = 1;
+  string ticket_code = 2;
+  string booking_seat_id = 3;
+  string status = 4;
 }

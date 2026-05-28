@@ -8,6 +8,7 @@ import java.util.List;
 @Builder
 public record HoldSeatCommand(
         RequestContext context,
+        String creator,
         String tripId,
         List<String> seatNos,
         String holdBy,

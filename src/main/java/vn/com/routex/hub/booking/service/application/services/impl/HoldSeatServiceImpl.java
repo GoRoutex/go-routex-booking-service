@@ -55,7 +55,7 @@ public class HoldSeatServiceImpl implements HoldSeatService {
     private final TripSeatCacheService tripSeatCacheService;
     private final BookingService bookingService;
     private final UserServiceInternalContextFeignClient userServiceClient;
-    private static final String LOCK_PATTERN = "lock:seat:";
+    private static final String LOCK_PATTERN = "lock:trip:";
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
     @Override
@@ -187,7 +187,7 @@ public class HoldSeatServiceImpl implements HoldSeatService {
 
         List<String> lockKeys = seatNos
                 .stream()
-                .map(seatNo -> LOCK_PATTERN + seatNo)
+                .map(seatNo -> LOCK_PATTERN + command.tripId() + ":seat:" + seatNo)
                 .toList();
 
         RedisDistributedLocker multiLock = redisDistributedService.getMultiLock(lockKeys);

@@ -21,6 +21,8 @@ import java.util.List;
 @SuperBuilder
 public class HoldSeatRequest extends BaseRequest {
 
+    private String creator;
+
     @Valid
     @NotNull
     private HoldSeatRequestData data;
