@@ -67,6 +67,12 @@ public class BookingServiceImpl implements BookingService {
                 .heldAt(command.heldAt())
                 .holdUntil(command.holdUntil())
                 .creator(command.holdBy())
+                .pickupType(command.pickupType())
+                .pickupStopId(command.pickupStopId())
+                .pickupAddress(command.pickupAddress())
+                .dropoffType(command.dropoffType())
+                .dropoffStopId(command.dropoffStopId())
+                .dropoffAddress(command.dropoffAddress())
                 .build();
 
         List<BookingSeat> bookingSeats = tripSeats.stream()

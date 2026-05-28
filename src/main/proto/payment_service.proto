@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package vn.com.routex.hub.grpc;
+
+option java_multiple_files = true;
+option java_package = "vn.com.routex.hub.grpc";
+option java_outer_classname = "PaymentServiceProto";
+
+service PaymentGrpcService {
+  rpc FetchPaymentContext (FetchPaymentContextRequest) returns (FetchPaymentContextResponse);
+}
+
+message PaymentRequestContext {
+  string request_id = 1;
+  string request_date_time = 2;
+  string channel = 3;
+}
+
+message FetchPaymentContextRequest {
+  string booking_code = 1;
+  PaymentRequestContext context = 2;
+}
+
+message FetchPaymentContextResponse {
+  string payment_id = 1;
+  string booking_code = 2;
+  string payment_status = 3;
+  string paid_at = 4; // ISO OffsetDateTime string
+}

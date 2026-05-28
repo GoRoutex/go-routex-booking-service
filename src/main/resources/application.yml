@@ -138,3 +138,19 @@ clients:
     base-url: ${PAYMENT_SERVICE_BASE_URL:http://localhost:8080/api/v1/payment-service/internal}
   user-service:
     base-url: ${USER_SERVICE_BASE_URL:http://localhost:8080/api/v1/user-service/internal}
+
+grpc:
+  server:
+    port: ${GRPC_SERVER_PORT:9094}
+  client:
+    merchantService:
+      address: ${MERCHANT_SERVICE_GRPC_ADDRESS:static://localhost:9090}
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
+      negotiationType: plaintext
+    paymentService:
+      address: ${PAYMENT_SERVICE_GRPC_ADDRESS:static://localhost:9096}
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
+      negotiationType: plaintext
+

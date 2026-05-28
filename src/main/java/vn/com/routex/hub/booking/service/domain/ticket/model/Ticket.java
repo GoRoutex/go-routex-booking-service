@@ -36,4 +36,10 @@ public class Ticket extends AbstractAuditingEntity {
     private String checkedInBy;
     private String boardedBy;
     private String cancelledBy;
+    private String pickupType;
+    private String pickupStopId;
+    private String pickupAddress;
+    private String dropoffType;
+    private String dropoffStopId;
+    private String dropoffAddress;
 }

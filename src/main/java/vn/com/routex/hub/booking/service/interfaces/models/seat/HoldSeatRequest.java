@@ -21,6 +21,8 @@ import java.util.List;
 @SuperBuilder
 public class HoldSeatRequest extends BaseRequest {
 
+    private String creator;
+
     @Valid
     @NotNull
     private HoldSeatRequestData data;
@@ -53,5 +55,12 @@ public class HoldSeatRequest extends BaseRequest {
         private List<String> seatNos;
 
         private String holdBy;
+
+        private String pickupType;
+        private String pickupStopId;
+        private String pickupAddress;
+        private String dropoffType;
+        private String dropoffStopId;
+        private String dropoffAddress;
     }
 }

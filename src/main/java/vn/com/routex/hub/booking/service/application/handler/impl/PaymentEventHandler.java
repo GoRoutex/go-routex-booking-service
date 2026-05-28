@@ -24,9 +24,7 @@ import vn.com.routex.hub.booking.service.domain.ticket.model.Ticket;
 import vn.com.routex.hub.booking.service.infrastructure.cache.mapper.TripCacheMapper;
 import vn.com.routex.hub.booking.service.infrastructure.cache.redis.models.TripCacheSeat;
 import vn.com.routex.hub.booking.service.infrastructure.cache.redis.service.TripSeatCacheService;
-import vn.com.routex.hub.booking.service.infrastructure.integration.merchantplatform.client.MerchantTicketFeignClient;
-import vn.com.routex.hub.booking.service.infrastructure.integration.merchantplatform.dto.CreateTicketClientRequest;
-import vn.com.routex.hub.booking.service.infrastructure.integration.merchantplatform.dto.CreateTicketClientResponse;
+import vn.com.routex.hub.booking.service.infrastructure.integration.merchantplatform.MerchantTicketGrpcAdapter;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.event.DomainEvent;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.event.PaymentFailedEvent;
 import vn.com.routex.hub.booking.service.infrastructure.kafka.event.PaymentSuccessEvent;
@@ -53,7 +51,7 @@ public class PaymentEventHandler implements PaymentEvent {
     private final BookingRepositoryPort bookingRepositoryPort;
     private final TripSeatRepositoryPort tripSeatRepositoryPort;
     private final BookingSeatRepositoryPort bookingSeatRepositoryPort;
-    private final MerchantTicketFeignClient merchantTicketFeignClient;
+    private final MerchantTicketGrpcAdapter merchantTicketGrpcAdapter;
     private final PaymentRepositoryPort paymentRepositoryPort;
     private final TripSeatCacheService tripSeatCacheService;
     private final OutBoxService outBoxService;
@@ -199,58 +197,7 @@ public class PaymentEventHandler implements PaymentEvent {
     }
 
     private List<Ticket> createTickets(BookingAggregate aggregate, OffsetDateTime paidAt) {
-        OffsetDateTime issuedAt = paidAt != null ? paidAt : OffsetDateTime.now();
-        CreateTicketClientRequest request = CreateTicketClientRequest.builder()
-                .requestId(UUID.randomUUID().toString())
-                .requestDateTime(DateTimeUtils.getCurrentRequestDateTime())
-                .channel("INTERNAL")
-                .data(aggregate.bookingSeats().stream()
-                        .map(bookingSeat -> CreateTicketClientRequest.CreateTicketClientData.builder()
-                                .bookingId(aggregate.booking().getId())
-                                .bookingSeatId(bookingSeat.getId())
-                                .merchantId(aggregate.booking().getMerchantId())
-                                .tripId(bookingSeat.getTripId())
-                                .vehicleId(aggregate.booking().getVehicleId())
-                                .seatNumber(bookingSeat.getSeatNo())
-                                .customerName(aggregate.booking().getCustomerName())
-                                .customerPhone(aggregate.booking().getCustomerPhone())
-                                .customerEmail(aggregate.booking().getCustomerEmail())
-                                .price(bookingSeat.getPrice())
-                                .issuedAt(issuedAt)
-                                .creator(aggregate.booking().getCreator())
-                                .build())
-                        .collect(Collectors.toList()))
-                .build();
-
-
-        sLog.info("Ticket request: {}", request);
-
-        CreateTicketClientResponse response = merchantTicketFeignClient.createTickets(request);
-
-        sLog.info("Ticket Response: {}", response);
-        return response.getData().stream()
-                .map(item -> Ticket.builder()
-                        .id(item.getTicketId())
-                        .ticketCode(item.getTicketCode())
-                        .bookingId(aggregate.booking().getId())
-                        .bookingSeatId(item.getBookingSeatId())
-                        .vehicleId(aggregate.booking().getVehicleId())
-                        .tripId(aggregate.booking().getTripId())
-                        .seatNumber(aggregate.bookingSeats().stream()
-                                .filter(s -> s.getId().equals(item.getBookingSeatId()))
-                                .findFirst()
-                                .map(BookingSeat::getSeatNo)
-                                .orElse(""))
-                        .price(aggregate.bookingSeats().stream()
-                                .filter(s -> s.getId().equals(item.getBookingSeatId()))
-                                .findFirst()
-                                .map(BookingSeat::getPrice)
-                                .orElse(java.math.BigDecimal.ZERO))
-                        .status(TicketStatus.valueOf(item.getStatus()))
-
-                        .issuedAt(issuedAt)
-                        .build())
-                .collect(Collectors.toList());
+        return merchantTicketGrpcAdapter.createTickets(aggregate, paidAt);
     }
 
 

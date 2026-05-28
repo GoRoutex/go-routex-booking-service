@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+package vn.com.routex.hub.grpc;
+
+option java_multiple_files = true;
+option java_package = "vn.com.routex.hub.grpc";
+option java_outer_classname = "BookingServiceProto";
+
+service BookingGrpcService {
+  rpc FetchBookingPaymentContext (FetchBookingPaymentContextRequest) returns (FetchBookingPaymentContextResponse);
+  rpc HoldSeat (HoldSeatProtoRequest) returns (HoldSeatProtoResponse);
+}
+
+message BookingRequestContext {
+  string request_id = 1;
+  string request_date_time = 2;
+  string channel = 3;
+}
+
+message FetchBookingPaymentContextRequest {
+  string booking_code = 1;
+  BookingRequestContext context = 2;
+}
+
+message FetchBookingPaymentContextResponse {
+  string booking_id = 1;
+  string booking_code = 2;
+  string total_amount = 3;
+  string currency = 4;
+  string booking_status = 5;
+  string hold_until = 6;
+}
+
+message HoldSeatProtoRequest {
+  string trip_id = 1;
+  repeated string seat_nos = 2;
+  string hold_by = 3;
+  string customer_name = 4;
+  string customer_phone = 5;
+  string customer_email = 6;
+  string pickup_type = 7;
+  string pickup_stop_id = 8;
+  string pickup_address = 9;
+  string dropoff_type = 10;
+  string dropoff_stop_id = 11;
+  string dropoff_address = 12;
+  BookingRequestContext context = 13;
+}
+
+message HoldSeatProtoResponse {
+  string booking_id = 1;
+  string booking_code = 2;
+  string hold_until = 3;
+  string total_amount = 4;
+  string hold_token = 5;
+  repeated HoldSeatItemProtoResult seats = 6;
+}
+
+message HoldSeatItemProtoResult {
+  string trip_id = 1;
+  string seat_no = 2;
+  string status = 3;
+}

@@ -33,6 +33,12 @@ public class TicketPersistenceMapper {
                 .createdBy(entity.getCreatedBy())
                 .updatedAt(entity.getUpdatedAt())
                 .updatedBy(entity.getUpdatedBy())
+                .pickupType(entity.getPickupType())
+                .pickupStopId(entity.getPickupStopId())
+                .pickupAddress(entity.getPickupAddress())
+                .dropoffType(entity.getDropoffType())
+                .dropoffStopId(entity.getDropoffStopId())
+                .dropoffAddress(entity.getDropoffAddress())
                 .build();
     }
 
@@ -61,6 +67,12 @@ public class TicketPersistenceMapper {
                 .createdBy(domain.getCreatedBy())
                 .updatedAt(domain.getUpdatedAt())
                 .updatedBy(domain.getUpdatedBy())
+                .pickupType(domain.getPickupType())
+                .pickupStopId(domain.getPickupStopId())
+                .pickupAddress(domain.getPickupAddress())
+                .dropoffType(domain.getDropoffType())
+                .dropoffStopId(domain.getDropoffStopId())
+                .dropoffAddress(domain.getDropoffAddress())
                 .build();
     }
 }
